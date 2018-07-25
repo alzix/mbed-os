@@ -19,13 +19,17 @@
 
 #if SPM_LEVEL == 0
 
-bool is_buffer_accessible(const void *ptr, size_t size, spm_partition_t * accessing_partition)
+bool is_buffer_accessible(const void *ptr, size_t size, spm_partition_t *accessing_partition)
 {
     if (NULL == ptr) {
         return false;
     }
 
-    if (((uintptr_t)ptr + size) < ((uintptr_t)ptr)) {
+    if (size == 0) {
+        return true;
+    }
+    
+    if ((uintptr_t)ptr + size - 1 < (uintptr_t)ptr) {
         return false;
     }
 
