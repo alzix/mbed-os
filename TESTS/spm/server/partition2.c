@@ -66,7 +66,7 @@ void part2_main(void *ptr)
                     break;
             }
 
-            psa_end(msg.handle, PSA_SUCCESS);
+            psa_reply(msg.handle, PSA_SUCCESS);
         }
         else {  // -- Doorbell test
 
@@ -79,8 +79,8 @@ void part2_main(void *ptr)
                     if (PSA_NSPE_IDENTIFIER == caller_part_id) {
                         SPM_PANIC("Caller partition is non secure\n");
                     }
-                    // In doorbell scenario the server first calls psa_end()
-                    psa_end(msg.handle, PSA_SUCCESS);
+                    // In doorbell scenario the server first calls psa_reply()
+                    psa_reply(msg.handle, PSA_SUCCESS);
                     // Then the servers waits to some driver making long calculations - imitate using osDelay()
                     osDelay(20);
                     // After work is done, ring the doorbell
@@ -89,7 +89,7 @@ void part2_main(void *ptr)
                 }
                 case PSA_IPC_CONNECT:
                 case PSA_IPC_DISCONNECT:
-                    psa_end(msg.handle, PSA_SUCCESS);
+                    psa_reply(msg.handle, PSA_SUCCESS);
                     break;
                 default:
                     SPM_PANIC("Unexpected message type %d!", (int)(msg.type));

@@ -39,7 +39,7 @@ static psa_error_t proccess_connect_request(void)
         res = ((res != PSA_SUCCESS) ? res : PSA_TEST_ERROR);
     }
 
-    psa_end(msg.handle, res);
+    psa_reply(msg.handle, res);
 
     return res;
 }
@@ -103,7 +103,7 @@ PSA_TEST_SERVER(identity_during_connect)
     identity = psa_identity(msg.handle);
     *status_ptr = (identity == -1) ? PSA_SUCCESS : PSA_TEST_ERROR;
 
-    psa_end(msg.handle, PSA_SUCCESS);
+    psa_reply(msg.handle, PSA_SUCCESS);
 
     disconnect_status = proccess_disconnect_request();
     test_status  = (test_status != PSA_SUCCESS) ? test_status : disconnect_status;
@@ -137,7 +137,7 @@ PSA_TEST_SERVER(identity_during_call)
     identity = psa_identity(msg.handle);
     *status_ptr = (identity == -1) ? PSA_SUCCESS : PSA_TEST_ERROR;
 
-    psa_end(msg.handle, PSA_SUCCESS);
+    psa_reply(msg.handle, PSA_SUCCESS);
 
     disconnect_status = proccess_disconnect_request();
     test_status  = (test_status != PSA_SUCCESS) ? test_status : disconnect_status;
@@ -186,7 +186,7 @@ PSA_TEST_SERVER(msg_size_assertion)
         *status_ptr = PSA_SUCCESS;
     }
 
-    psa_end(msg.handle, test_status);
+    psa_reply(msg.handle, test_status);
     free(buff);
     disconnect_status = proccess_disconnect_request();
     test_status  = (test_status != PSA_SUCCESS) ? test_status : disconnect_status;
@@ -207,7 +207,7 @@ PSA_TEST_SERVER(reject_connection)
         res = ((res != PSA_SUCCESS) ? res : PSA_TEST_ERROR);
     }
 
-    psa_end(msg.handle, PSA_CONNECTION_REFUSED);
+    psa_reply(msg.handle, PSA_CONNECTION_REFUSED);
     *status_ptr = res;
     return res;
 }
@@ -242,7 +242,7 @@ PSA_TEST_SERVER(read_at_outofboud_offset)
         *status_ptr = PSA_SUCCESS;
     }
 
-    psa_end(msg.handle, test_status);
+    psa_reply(msg.handle, test_status);
     disconnect_status = proccess_disconnect_request();
     test_status  = (test_status != PSA_SUCCESS) ? test_status : disconnect_status;
     return test_status;
@@ -288,7 +288,7 @@ PSA_TEST_SERVER(msg_read_truncation)
         *status_ptr = PSA_SUCCESS;
     }
 
-    psa_end(msg.handle, test_status);
+    psa_reply(msg.handle, test_status);
     disconnect_status = proccess_disconnect_request();
     free(buff);
     test_status  = (test_status != PSA_SUCCESS) ? test_status : disconnect_status;
@@ -334,7 +334,7 @@ PSA_TEST_SERVER(skip_zero)
         *status_ptr = PSA_SUCCESS;
     }
 
-    psa_end(msg.handle, test_status);
+    psa_reply(msg.handle, test_status);
     disconnect_status = proccess_disconnect_request();
     free(buff);
     test_status  = (test_status != PSA_SUCCESS) ? test_status : disconnect_status;
@@ -383,7 +383,7 @@ PSA_TEST_SERVER(skip_some)
         *status_ptr = PSA_SUCCESS;
     }
 
-    psa_end(msg.handle, test_status);
+    psa_reply(msg.handle, test_status);
     disconnect_status = proccess_disconnect_request();
     free(buff);
     test_status  = (test_status != PSA_SUCCESS) ? test_status : disconnect_status;
@@ -432,7 +432,7 @@ PSA_TEST_SERVER(skip_more_than_left)
         *status_ptr = PSA_SUCCESS;
     }
 
-    psa_end(msg.handle, test_status);
+    psa_reply(msg.handle, test_status);
     disconnect_status = proccess_disconnect_request();
     free(buff);
     test_status  = (test_status != PSA_SUCCESS) ? test_status : disconnect_status;
@@ -508,7 +508,7 @@ PSA_TEST_SERVER(rhandle_factorial)
         }
 
         num = NULL;
-        psa_end(msg.handle, PSA_SUCCESS);
+        psa_reply(msg.handle, PSA_SUCCESS);
         if (disconnect_count > 0) {
             break;
         }
@@ -588,7 +588,7 @@ PSA_TEST_SERVER(cross_partition_call)
         psa_write(msg.handle, 0, buff, data_read);
     }
 
-    psa_end(msg.handle, partition_call_status);
+    psa_reply(msg.handle, partition_call_status);
     free(buff);
     disconnect_status = proccess_disconnect_request();
     test_status  = (test_status != PSA_SUCCESS) ? test_status : disconnect_status;
@@ -631,7 +631,7 @@ PSA_TEST_SERVER(doorbell_test)
     }
 
     if (partition_call_status == PSA_SUCCESS) {
-        // Wait for doorball notification - Only after that call psa_end() for the client called you
+        // Wait for doorball notification - Only after that call psa_reply() for the client called you
         signals = psa_wait_interrupt(PSA_DOORBELL, PSA_BLOCK);
         if ((signals & PSA_DOORBELL) == 0) {
             partition_call_status = PSA_TEST_ERROR;
@@ -646,7 +646,7 @@ PSA_TEST_SERVER(doorbell_test)
 
     *status_ptr = partition_call_status;
 
-    psa_end(msg.handle, partition_call_status);
+    psa_reply(msg.handle, partition_call_status);
     disconnect_status = proccess_disconnect_request();
 
     test_status  = (test_status != PSA_SUCCESS) ? test_status : disconnect_status;
@@ -654,7 +654,7 @@ PSA_TEST_SERVER(doorbell_test)
     return test_status;
 }
 
-PSA_TEST_SERVER(psa_end_on_NULL_HANDLE)
+PSA_TEST_SERVER(psa_reply_on_NULL_HANDLE)
 {
     psa_error_t test_status = PSA_SUCCESS;
     psa_error_t disconnect_status = PSA_SUCCESS;
@@ -672,8 +672,8 @@ PSA_TEST_SERVER(psa_end_on_NULL_HANDLE)
 
     *status_ptr = (msg.handle != PSA_NULL_HANDLE) ? PSA_SUCCESS : PSA_TEST_ERROR;
 
-    psa_end(PSA_NULL_HANDLE, PSA_SUCCESS);
-    psa_end(msg.handle, PSA_SUCCESS);
+    psa_reply(PSA_NULL_HANDLE, PSA_SUCCESS);
+    psa_reply(msg.handle, PSA_SUCCESS);
 
     disconnect_status = proccess_disconnect_request();
     test_status  = (test_status != PSA_SUCCESS) ? test_status : disconnect_status;
@@ -696,6 +696,6 @@ psa_test_server_side_func test_list[] = {
     PSA_TEST_SERVER_NAME(rhandle_factorial),
     PSA_TEST_SERVER_NAME(cross_partition_call),
     PSA_TEST_SERVER_NAME(doorbell_test),
-    PSA_TEST_SERVER_NAME(psa_end_on_NULL_HANDLE),
+    PSA_TEST_SERVER_NAME(psa_reply_on_NULL_HANDLE),
     NULL
 };

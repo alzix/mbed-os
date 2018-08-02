@@ -296,7 +296,6 @@ void psa_close(psa_handle_t handle)
     };
 
     spm_pending_close_msg_t msg = {
-        .rc = PSA_SUCCESS,
         .completion_sem_id = osSemaphoreNew( SPM_COMPLETION_SEM_MAX_COUNT,
                                              SPM_COMPLETION_SEM_INITIAL_COUNT,
                                              &msg_sem_attr

@@ -478,8 +478,9 @@ void psa_reply(psa_handle_t msg_handle, psa_error_t retval)
             completion_sem_id = call_msg_data->completion_sem_id;
             break;
         }
-        case PSA_IPC_CLOSE:
+        case PSA_IPC_DISCONNECT:
         {
+            // If the message type is PSA_IPC_DISCONNECT then the status code is ignored
             break;
         }
         default:

@@ -104,7 +104,7 @@ void part1_main(void *ptr)
                 break;
         }
 
-        psa_end(msg.handle, PSA_SUCCESS);
+        psa_reply(msg.handle, PSA_SUCCESS);
     }
 }
 

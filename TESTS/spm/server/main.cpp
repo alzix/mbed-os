@@ -208,7 +208,7 @@ PSA_TEST_CLIENT(doorbell_test)
     psa_close(test_handle);
 }
 
-PSA_TEST_CLIENT(psa_end_on_NULL_HANDLE)
+PSA_TEST_CLIENT(psa_reply_on_NULL_HANDLE)
 {
     psa_handle_t test_handle = psa_connect(TEST, TEST_ROT_SRV_MINOR);
     TEST_ASSERT(test_handle > 0);
@@ -280,7 +280,7 @@ Case cases[] = {
     SPM_UTEST_CASE("Test rhandle implementation by calculating the factorial function", rhandle_factorial),
     SPM_UTEST_CASE("Test a call flow between 2 secure partitions", cross_partition_call),
     SPM_UTEST_CASE("Test a common DOORBELL scenario", doorbell_test),
-    SPM_UTEST_CASE("Test psa_end call on NULL_HANDLE", psa_end_on_NULL_HANDLE),
+    SPM_UTEST_CASE("Test psa_reply call on NULL_HANDLE", psa_reply_on_NULL_HANDLE),
 };
 
 //Declare your test specification with a custom setup handler

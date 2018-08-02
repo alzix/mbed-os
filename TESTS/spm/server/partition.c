@@ -64,13 +64,13 @@ void part1_main(void *ptr)
                         SPM_PANIC("Invalid test ID was sent!\n");
                     }
 
-                    psa_end(msg.handle, PSA_SUCCESS);
+                    psa_reply(msg.handle, PSA_SUCCESS);
                     test_status = test_list[test_idx](&test_result);
                     break;
                 case GET_TEST_RESULT:
                     test_idx++;
                     psa_write(msg.handle, 0, &test_result, sizeof(test_result));
-                    psa_end(msg.handle, test_status);
+                    psa_reply(msg.handle, test_status);
                     break;
                 default:
                     SPM_PANIC("Got illegal Value in test action");
@@ -79,7 +79,7 @@ void part1_main(void *ptr)
             break;
         case PSA_IPC_CONNECT:
         case PSA_IPC_DISCONNECT:
-            psa_end(msg.handle, PSA_SUCCESS);
+            psa_reply(msg.handle, PSA_SUCCESS);
             break;
         default:
             SPM_PANIC("Unexpected message type %d!", (int)(msg.type));

@@ -50,16 +50,16 @@ void server_main(void *ptr)
                     SPM_PANIC("Invalid msg type");
                 }
             }
-            psa_end(msg.handle, PSA_SUCCESS);
+            psa_reply(msg.handle, PSA_SUCCESS);
         } else if (signals & DROP_CONN_MSK) {
             psa_get(DROP_CONN_MSK, &msg);
             switch (msg.type) {
                 case PSA_IPC_CONNECT:
                 case PSA_IPC_DISCONNECT:
-                    psa_end(msg.handle, PSA_SUCCESS);
+                    psa_reply(msg.handle, PSA_SUCCESS);
                     break;
                 case PSA_IPC_CALL:
-                    psa_end(msg.handle, PSA_DROP_CONNECTION);
+                    psa_reply(msg.handle, PSA_DROP_CONNECTION);
                     break;
                 default:
                     SPM_PANIC("Invalid msg type");
