@@ -138,7 +138,7 @@ void psa_write(psa_handle_t msg_handle, uint32_t outvec_idx, const void *buffer,
  * @param[in] msg_handle Handle for the client's message.
  * @param[in] retval Return code to the client.
  */
-void psa_end(psa_handle_t msg_handle, psa_error_t retval);
+void psa_reply(psa_handle_t msg_handle, psa_error_t retval);
 
 /**
  * Send a doorbell signal to a specific partition that is listening for that signal type.

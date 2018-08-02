@@ -405,13 +405,8 @@ void psa_write(psa_handle_t msg_handle, uint32_t outvec_idx, const void *buffer,
     return;
 }
 
-void psa_end(psa_handle_t msg_handle, psa_error_t retval)
+void psa_reply(psa_handle_t msg_handle, psa_error_t retval)
 {
-    // handle should be PSA_NULL_HANDLE when serving PSA_IPC_DISCONNECT
-    if (msg_handle == PSA_NULL_HANDLE) {
-        return;
-    }
-
     spm_active_msg_t *active_msg = get_msg_from_handle(msg_handle);
     spm_ipc_channel_t *active_channel = active_msg->channel;
     SPM_ASSERT(active_channel != NULL);
@@ -483,8 +478,12 @@ void psa_end(psa_handle_t msg_handle, psa_error_t retval)
             completion_sem_id = call_msg_data->completion_sem_id;
             break;
         }
+        case PSA_IPC_CLOSE:
+        {
+            break;
+        }
         default:
-            SPM_PANIC("psa_end - unexpected message type=0x%08X", active_channel->msg_type);
+            SPM_PANIC("psa_reply() - Unexpected message type=0x%08X", active_channel->msg_type);
             break;
     }
 

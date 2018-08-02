@@ -31,7 +31,7 @@ For a secure partition, you need:
   * Be structured as a loop that waits for inputs.
   * Never exit its loop (considered as a programming error).
   * Be written in C or 'extern "C"' to avoid C++ name mangling.
-  * Follow PSA IPC rules. Secure partitions communicate with one another using the IPC API defined in [IPC API](https://github.com/ARMmbed/PSA-IPC-doc/blob/master/IPC_revision.md). All IPC messages must eventually be completed [`call psa_end()`]. Note that the SPM does not schedule IPC messages fairly.
+  * Follow PSA IPC rules. Secure partitions communicate with one another using the IPC API defined in [IPC API](https://github.com/ARMmbed/PSA-IPC-doc/blob/master/IPC_revision.md). All IPC messages must eventually be completed [`call psa_reply()`]. Note that the SPM does not schedule IPC messages fairly.
 * A **manifest file** in JSON format, that describes the Secure Partition characteristics. The specifications in the manifest file are validated during the build process and at run time.
 
 ### Manifest file example

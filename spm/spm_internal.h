@@ -104,6 +104,16 @@ typedef __PACKED_STRUCT spm_pending_connect_msg {
     osSemaphoreId_t completion_sem_id; /* Semaphore to be released at the end of execution */
 } __ALIGNED(4) spm_pending_connect_msg_t;
 
+// spm_pending_close_msg struct below is packed since in a dual processor solution
+// it is used in both processors
+/*
+ * Structure containing data sent from NSPE for closing a connection.
+ */
+typedef __PACKED_STRUCT spm_pending_close_msg {
+    psa_error_t rc; /* Return code to be filled by the Root of Trust Service.*/
+    osSemaphoreId_t completion_sem_id; /* Semaphore to be released at the end of execution */
+} __ALIGNED(4) spm_pending_close_msg;
+
 /*
  * Structure to aggregate channels queue in a Root of Trust Service.
  */

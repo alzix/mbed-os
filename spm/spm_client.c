@@ -263,22 +263,60 @@ psa_error_t psa_call(
     return (psa_error_t)msg.rc;
 }
 
+void psa_close_async(psa_handle_t handle, spm_pending_close_msg *msg)
+{
+    SPM_ASSERT(msg != NULL);
+
+    spm_ipc_channel_t *channel = get_channel_from_handle(handle);
+
+    channel_state_switch( &channel->state,
+                          SPM_CHANNEL_STATE_IDLE,
+                          SPM_CHANNEL_STATE_INVALID
+                        );
+
+    channel->msg_ptr  = msg;
+    channel->msg_type = PSA_IPC_CLOSE;
+
+    spm_rot_service_queue_enqueue(channel->dst_rot_service, channel);
+}
+
 void psa_close(psa_handle_t handle)
 {
     if (handle == PSA_NULL_HANDLE) {
-        // Negative handles will fail in handle manager.
+        // Invalid handles will fail inside handle manager [called from psa_close_async()]
         return;
     }
 
-    spm_ipc_channel_t *channel = get_channel_from_handle(handle);
-    channel_state_switch(&channel->state,
-        SPM_CHANNEL_STATE_IDLE, SPM_CHANNEL_STATE_INVALID);
+    osRtxSemaphore_t msg_sem_storage = {0};
+    const osSemaphoreAttr_t msg_sem_attr = {
+        .name      = NULL,
+        .attr_bits = 0,
+        .cb_mem    = &msg_sem_storage,
+        .cb_size   = sizeof(msg_sem_storage),
+    };
 
-    channel->msg_type = PSA_IPC_DISCONNECT;
-    // Forward the handle as we return instantly.
-    channel->msg_ptr = (void *)handle;
+    spm_pending_close_msg_t msg = {
+        .rc = PSA_SUCCESS,
+        .completion_sem_id = osSemaphoreNew( SPM_COMPLETION_SEM_MAX_COUNT,
+                                             SPM_COMPLETION_SEM_INITIAL_COUNT,
+                                             &msg_sem_attr
+                                           ),
 
-    spm_rot_service_queue_enqueue(channel->dst_rot_service, channel);
+    };
+
+    if (NULL == msg.completion_sem_id) {
+        SPM_PANIC("Could not create a semaphore for close message");
+    }
+
+    psa_close_async(handle, &msg);
+
+    osStatus_t os_status = osSemaphoreAcquire(msg.completion_sem_id, osWaitForever);
+    SPM_ASSERT(osOK == os_status);
+
+    os_status = osSemaphoreDelete(msg.completion_sem_id);
+    SPM_ASSERT(osOK == os_status);
+
+    PSA_UNUSED(os_status);
 }
 
 uint32_t psa_framework_version(void)
