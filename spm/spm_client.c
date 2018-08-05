@@ -263,7 +263,7 @@ psa_error_t psa_call(
     return (psa_error_t)msg.rc;
 }
 
-void psa_close_async(psa_handle_t handle, spm_pending_close_msg *msg)
+void psa_close_async(psa_handle_t handle, spm_pending_close_msg_t *msg)
 {
     SPM_ASSERT(msg != NULL);
 
@@ -275,7 +275,7 @@ void psa_close_async(psa_handle_t handle, spm_pending_close_msg *msg)
                         );
 
     channel->msg_ptr  = msg;
-    channel->msg_type = PSA_IPC_CLOSE;
+    channel->msg_type = PSA_IPC_DISCONNECT;
 
     spm_rot_service_queue_enqueue(channel->dst_rot_service, channel);
 }

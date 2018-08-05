@@ -111,9 +111,9 @@
       "minor_policy": "RELAXED"
     },
     {
-      "name": "PART2_END_INVALID_HANDLE",
+      "name": "PART2_REPLY_INVALID_HANDLE",
       "identifier": "0x00001A18",
-      "signal": "PART2_END_INVALID_HANDLE_MSK",
+      "signal": "PART2_REPLY_INVALID_HANDLE_MSK",
       "non_secure_clients": true,
       "minor_version": 5,
       "minor_policy": "RELAXED"

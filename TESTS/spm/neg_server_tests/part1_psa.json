@@ -7,17 +7,17 @@
   "stack_size": "0x200",
   "heap_size": "0x400",
   "services": [{
-      "name": "PART1_END_INVALID_RETVAL_CONNECT",
+      "name": "PART1_REPLY_INVALID_RETVAL_CONNECT",
       "identifier": "0x00001A25",
-      "signal": "PART1_END_INVALID_RETVAL_CONNECT_MSK",
+      "signal": "PART1_REPLY_INVALID_RETVAL_CONNECT_MSK",
       "non_secure_clients": true,
       "minor_version": 5,
       "minor_policy": "RELAXED"
     },
     {
-      "name": "PART1_END_INVALID_RETVAL_CALL",
+      "name": "PART1_REPLY_INVALID_RETVAL_CALL",
       "identifier": "0x00001A26",
-      "signal": "PART1_END_INVALID_RETVAL_CALL_MSK",
+      "signal": "PART1_REPLY_INVALID_RETVAL_CALL_MSK",
       "non_secure_clients": true,
       "minor_version": 5,
       "minor_policy": "RELAXED"

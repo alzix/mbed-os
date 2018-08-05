@@ -52,7 +52,7 @@ void server_main1(void *ptr)
                     break;
             }
 
-            psa_end(msg.handle, PSA_SUCCESS);
+            psa_reply(msg.handle, PSA_SUCCESS);
         }
     }
 }

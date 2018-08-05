@@ -36,7 +36,7 @@ void server_main1(void *ptr)
             psa_get(PART1_CALL_NON_EXISTS_EXTERN_SID_MSK, &msg);
             switch (msg.type) {
                 case PSA_IPC_CONNECT: {
-                    psa_end(msg.handle, PSA_SUCCESS);
+                    psa_reply(msg.handle, PSA_SUCCESS);
                     break;
                 }
                 case PSA_IPC_CALL: {

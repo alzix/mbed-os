@@ -81,7 +81,7 @@ void server_main2(void *ptr)
                     TEST_FAIL_MESSAGE("server_read_invalid_handle msg type failure");
                 }
             }
-            psa_end(msg.handle, PSA_SUCCESS);
+            psa_reply(msg.handle, PSA_SUCCESS);
         }
         else if (signals & PART2_READ_NULL_HANDLE_MSK) {
             psa_get(PART2_READ_NULL_HANDLE_MSK, &msg);
@@ -98,7 +98,7 @@ void server_main2(void *ptr)
                     TEST_FAIL_MESSAGE("server_read_null_handle msg type failure");
                 }
             }
-            psa_end(msg.handle, PSA_SUCCESS);
+            psa_reply(msg.handle, PSA_SUCCESS);
         }
         else if (signals & PART2_READ_NULL_BUFFER_MSK) {
             psa_get(PART2_READ_NULL_BUFFER_MSK, &msg);
@@ -115,7 +115,7 @@ void server_main2(void *ptr)
                     TEST_FAIL_MESSAGE("server_read_null_buffer msg type failure");
                 }
             }
-            psa_end(msg.handle, PSA_SUCCESS);
+            psa_reply(msg.handle, PSA_SUCCESS);
         }
         else if (signals & PART2_WRITE_BUFFER_NULL_MSK) {
             psa_get(PART2_WRITE_BUFFER_NULL_MSK, &msg);
@@ -137,7 +137,7 @@ void server_main2(void *ptr)
                     TEST_FAIL_MESSAGE("server_write_null_buffer msg type failure");
                 }
             }
-            psa_end(msg.handle, PSA_SUCCESS);
+            psa_reply(msg.handle, PSA_SUCCESS);
         }
         else if (signals & PART2_WRITE_RX_BUFF_NULL_MSK) {
             psa_get(PART2_WRITE_RX_BUFF_NULL_MSK, &msg);
@@ -159,7 +159,7 @@ void server_main2(void *ptr)
                     TEST_FAIL_MESSAGE("server_write_rx_buff_null msg type failure");
                 }
             }
-            psa_end(msg.handle, PSA_SUCCESS);
+            psa_reply(msg.handle, PSA_SUCCESS);
         }
         else if (signals & PART2_WRITE_INVALID_HANDLE_MSK) {
             psa_get(PART2_WRITE_INVALID_HANDLE_MSK, &msg);
@@ -182,7 +182,7 @@ void server_main2(void *ptr)
                     TEST_FAIL_MESSAGE("server_write_invalid_handle msg type failure");
                 }
             }
-            psa_end(msg.handle, PSA_SUCCESS);
+            psa_reply(msg.handle, PSA_SUCCESS);
         }
         else if (signals & PART2_WRITE_NULL_HANDLE_MSK) {
             psa_get(PART2_WRITE_NULL_HANDLE_MSK, &msg);
@@ -204,27 +204,27 @@ void server_main2(void *ptr)
                     TEST_FAIL_MESSAGE("server_write_null_handle msg type failure");
                 }
             }
-            psa_end(msg.handle, PSA_SUCCESS);
+            psa_reply(msg.handle, PSA_SUCCESS);
         }
-        else if (signals & PART2_END_INVALID_HANDLE_MSK) {
-            psa_get(PART2_END_INVALID_HANDLE_MSK, &msg);
+        else if (signals & PART2_REPLY_INVALID_HANDLE_MSK) {
+            psa_get(PART2_REPLY_INVALID_HANDLE_MSK, &msg);
             switch (msg.type) {
                 case PSA_IPC_CONNECT: {
                     break;
                 }
                 default: {
-                    TEST_FAIL_MESSAGE("server_end_invalid_handle msg type failure");
+                    TEST_FAIL_MESSAGE("server_reply_invalid_handle msg type failure");
                 }
             }
             psa_handle_t invalid_handle = msg.handle  + 10;
-            psa_end(invalid_handle, PSA_SUCCESS);
-            TEST_FAIL_MESSAGE("server_end_invalid_handle negative test failed");
+            psa_reply(invalid_handle, PSA_SUCCESS);
+            TEST_FAIL_MESSAGE("server_reply_invalid_handle negative test failed");
         }
         else if (signals & PART2_SET_RHANDLE_DURING_DISCONNECT_MSK) {
             psa_get(PART2_SET_RHANDLE_DURING_DISCONNECT_MSK, &msg);
             switch (msg.type) {
                 case PSA_IPC_CONNECT: {
-                    psa_end(msg.handle, PSA_SUCCESS);
+                    psa_reply(msg.handle, PSA_SUCCESS);
                     break;
                 }
                 case PSA_IPC_DISCONNECT: {
@@ -249,7 +249,7 @@ void server_main2(void *ptr)
                     TEST_FAIL_MESSAGE("server_notify_part_id_invalid msg type failure");
                 }
             }
-            psa_end(msg.handle, PSA_SUCCESS);
+            psa_reply(msg.handle, PSA_SUCCESS);
         }
         else if (signals & PART2_IDENTITY_INVALID_HANDLE_MSK) {
             psa_get(PART2_IDENTITY_INVALID_HANDLE_MSK, &msg);
@@ -266,7 +266,7 @@ void server_main2(void *ptr)
                     TEST_FAIL_MESSAGE("server_psa_identity_invalid_handle msg type failure");
                 }
             }
-            psa_end(msg.handle, PSA_SUCCESS);
+            psa_reply(msg.handle, PSA_SUCCESS);
         }
         else if (signals & PART2_IDENTITY_NULL_HANDLE_MSK) {
             psa_get(PART2_IDENTITY_NULL_HANDLE_MSK, &msg);
@@ -282,7 +282,7 @@ void server_main2(void *ptr)
                     TEST_FAIL_MESSAGE("server_psa_identity_null_handle msg type failure");
                 }
             }
-            psa_end(msg.handle, PSA_SUCCESS);
+            psa_reply(msg.handle, PSA_SUCCESS);
         }
         else if (signals & PART2_SET_RHANDLE_INVALID_HANDLE_MSK) {
             psa_get(PART2_SET_RHANDLE_INVALID_HANDLE_MSK, &msg);
@@ -297,7 +297,7 @@ void server_main2(void *ptr)
                     TEST_FAIL_MESSAGE("server_set_rhandle_invalid_handle msg type failure");
                 }
             }
-            psa_end(msg.handle, PSA_SUCCESS);
+            psa_reply(msg.handle, PSA_SUCCESS);
         }
         else if (signals & PART2_SET_RHANDLE_NULL_HANDLE_MSK) {
             psa_get(PART2_SET_RHANDLE_NULL_HANDLE_MSK, &msg);
@@ -311,7 +311,7 @@ void server_main2(void *ptr)
                     TEST_FAIL_MESSAGE("server_set_rhandle_null_handle msg type failure");
                 }
             }
-            psa_end(msg.handle, PSA_SUCCESS);
+            psa_reply(msg.handle, PSA_SUCCESS);
         }
         else if (signals & PART2_READ_WRAPAROUND_MSK) {
             psa_get(PART2_READ_WRAPAROUND_MSK, &msg);
@@ -329,7 +329,7 @@ void server_main2(void *ptr)
                     TEST_FAIL_MESSAGE("server_read_on_wraparound_msg_ptr msg type failure");
                 }
             }
-            psa_end(msg.handle, PSA_SUCCESS);
+            psa_reply(msg.handle, PSA_SUCCESS);
         }
         else if (signals & PART2_READ_EXCESS_INVEC_MSK) {
             psa_get(PART2_READ_EXCESS_INVEC_MSK, &msg);
@@ -348,7 +348,7 @@ void server_main2(void *ptr)
                     TEST_FAIL_MESSAGE("server_read_on_wraparound_msg_ptr msg type failure");
                 }
             }
-            psa_end(msg.handle, PSA_SUCCESS);
+            psa_reply(msg.handle, PSA_SUCCESS);
         }
         else if (signals & PART2_WRITE_WRAPAROUND_MSK) {
             psa_get(PART2_WRITE_WRAPAROUND_MSK, &msg);
@@ -366,7 +366,7 @@ void server_main2(void *ptr)
                     TEST_FAIL_MESSAGE("server_write_on_wraparound_msg_ptr msg type failure");
                 }
             }
-            psa_end(msg.handle, PSA_SUCCESS);
+            psa_reply(msg.handle, PSA_SUCCESS);
         }
         else if (signals & PART2_WRITE_SIZE_OVERFLOW_MSK) {
             psa_get(PART2_WRITE_SIZE_OVERFLOW_MSK, &msg);
@@ -385,7 +385,7 @@ void server_main2(void *ptr)
                     TEST_FAIL_MESSAGE("server_write_with_size_overflow msg type failure");
                 }
             }
-            psa_end(msg.handle, PSA_SUCCESS);
+            psa_reply(msg.handle, PSA_SUCCESS);
         }
         else if (signals & PART2_WRITE_EXCESS_OUTVEC_MSK) {
             psa_get(PART2_WRITE_EXCESS_OUTVEC_MSK, &msg);
@@ -404,7 +404,7 @@ void server_main2(void *ptr)
                     TEST_FAIL_MESSAGE("server_write_from_excess_outvec msg type failure");
                 }
             }
-            psa_end(msg.handle, PSA_SUCCESS);
+            psa_reply(msg.handle, PSA_SUCCESS);
         } else {
             SPM_PANIC("Unknown signal (0x%08x)", signals);
         }

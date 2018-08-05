@@ -230,30 +230,30 @@ void server_write_null_handle()
     TEST_FAIL_MESSAGE("server_write_null_handle negative test failed at client side");
 }
 
-//Testing server end handle does not exist on the platform
-void server_end_invalid_handle()
+//Testing server reply handle does not exist on the platform
+void server_reply_invalid_handle()
 {
-    psa_connect(PART2_END_INVALID_HANDLE, MINOR_VER);
+    psa_connect(PART2_REPLY_INVALID_HANDLE, MINOR_VER);
 
-    TEST_FAIL_MESSAGE("server_end_invalid_handle negative test failed at client side");
+    TEST_FAIL_MESSAGE("server_reply_invalid_handle negative test failed at client side");
 }
 
-//Testing server end invalid retval for connect
-void server_end_invalid_retval_connect()
+//Testing server reply invalid retval for connect
+void server_reply_invalid_retval_connect()
 {
-    psa_connect(PART1_END_INVALID_RETVAL_CONNECT, MINOR_VER);
+    psa_connect(PART1_REPLY_INVALID_RETVAL_CONNECT, MINOR_VER);
    
-    TEST_FAIL_MESSAGE("server_end_invalid_retval_connect negative test failed at client side");
+    TEST_FAIL_MESSAGE("server_reply_invalid_retval_connect negative test failed at client side");
 }
 
-//Testing server end invalid retval for call
-void server_end_invalid_retval_call()
+//Testing server reply invalid retval for call
+void server_reply_invalid_retval_call()
 {
-    psa_handle_t handle = negative_server_ipc_tests_connect(PART1_END_INVALID_RETVAL_CALL, MINOR_VER);
+    psa_handle_t handle = negative_server_ipc_tests_connect(PART1_REPLY_INVALID_RETVAL_CALL, MINOR_VER);
 
     psa_call(handle, NULL, 0, NULL, 0);
 
-    TEST_FAIL_MESSAGE("server_end_invalid_retval_call negative test failed at client side");
+    TEST_FAIL_MESSAGE("server_reply_invalid_retval_call negative test failed at client side");
 }
 
 //Testing server end rhandle is not NULL and msg type is disconnect
@@ -381,9 +381,9 @@ PSA_NEG_TEST(server_write_null_buffer)
 PSA_NEG_TEST(server_write_rx_buff_null)
 PSA_NEG_TEST(server_write_invalid_handle)
 PSA_NEG_TEST(server_write_null_handle)
-PSA_NEG_TEST(server_end_invalid_handle)
-PSA_NEG_TEST(server_end_invalid_retval_connect)
-PSA_NEG_TEST(server_end_invalid_retval_call)
+PSA_NEG_TEST(server_reply_invalid_handle)
+PSA_NEG_TEST(server_reply_invalid_retval_connect)
+PSA_NEG_TEST(server_reply_invalid_retval_call)
 PSA_NEG_TEST(server_set_rhandle_during_disconnect)
 PSA_NEG_TEST(server_notify_part_id_invalid)
 PSA_NEG_TEST(server_psa_identity_invalid_handle)
@@ -428,9 +428,9 @@ Case cases[] = {
     SPM_UTEST_CASE("Testing server write rx_buff is null", server_write_rx_buff_null),
     SPM_UTEST_CASE("Testing server write handle does not exist on the platform", server_write_invalid_handle),
     SPM_UTEST_CASE("Testing server write handle is PSA_NULL_HANDLE", server_write_null_handle),
-    SPM_UTEST_CASE("Testing server end handle does not exist on the platform", server_end_invalid_handle),
-    SPM_UTEST_CASE("Testing server end invalid retval for connect", server_end_invalid_retval_connect),
-    SPM_UTEST_CASE("Testing server end invalid retval for call", server_end_invalid_retval_call),
+    SPM_UTEST_CASE("Testing server reply handle does not exist on the platform", server_reply_invalid_handle),
+    SPM_UTEST_CASE("Testing server reply invalid retval for connect", server_reply_invalid_retval_connect),
+    SPM_UTEST_CASE("Testing server reply invalid retval for call", server_reply_invalid_retval_call),
     SPM_UTEST_CASE("Testing server set rhandle during disconnect", server_set_rhandle_during_disconnect),
     SPM_UTEST_CASE("Testing server notify partition id does not exist", server_notify_part_id_invalid),
     SPM_UTEST_CASE("Testing server identify handle does not exist on the platform", server_psa_identity_invalid_handle),

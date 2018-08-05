@@ -38,7 +38,7 @@ void server_main2(void *ptr)
                 case PSA_IPC_CALL:
                 case PSA_IPC_CONNECT:
                 case PSA_IPC_DISCONNECT:
-                    psa_end(msg.handle, PSA_SUCCESS);
+                    psa_reply(msg.handle, PSA_SUCCESS);
                     break;
                 default:
                     SPM_PANIC("Invalid msg type");
@@ -48,7 +48,7 @@ void server_main2(void *ptr)
             psa_get(PART2_CALL_INSIDE_PARTITION_MSK, &msg);
             switch (msg.type) {
                 case PSA_IPC_CONNECT: {
-                    psa_end(msg.handle, PSA_SUCCESS);
+                    psa_reply(msg.handle, PSA_SUCCESS);
                     break;
                 }
                 case PSA_IPC_CALL: {

@@ -62,6 +62,8 @@ static psa_error_t proccess_disconnect_request(void)
         res = ((res != PSA_SUCCESS) ? res : PSA_TEST_ERROR);
     }
 
+    psa_reply(msg.handle, PSA_SUCCESS);
+
     return res;
 }
 
