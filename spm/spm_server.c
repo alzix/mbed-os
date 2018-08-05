@@ -481,6 +481,7 @@ void psa_reply(psa_handle_t msg_handle, psa_error_t status)
 
                 memset(active_channel, 0, sizeof(*active_channel));
                 osStatus_t os_status = osMemoryPoolFree(g_spm.channel_mem_pool, active_channel);
+                active_channel = NULL;
                 SPM_ASSERT(osOK == os_status);
                 PSA_UNUSED(os_status);
             }

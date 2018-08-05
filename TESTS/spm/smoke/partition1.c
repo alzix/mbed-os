@@ -82,9 +82,6 @@ void part1_main(void *ptr)
                 break;
             }
             case PSA_IPC_DISCONNECT:
-                if (msg.handle != PSA_NULL_HANDLE) {
-                    SPM_PANIC("expected PSA_NULL_HANDLE recieved 0x%08x", msg.handle);
-                }
                 // Fallthrough
             case PSA_IPC_CONNECT:
             {
@@ -94,7 +91,7 @@ void part1_main(void *ptr)
                     (msg.in_size[0] != 0) || (msg.in_size[1] != 0) ||
                     (msg.in_size[2] != 0) || (msg.in_size[3] != 0)
                 ) {
-                    SPM_PANIC("Should not recieve iovecs in PSA_IPC_CONNECT");
+                    SPM_PANIC("Should not receive iovecs in PSA_IPC_CONNECT or PSA_IPC_DISCONNECT");
                 }
 
                 break;
