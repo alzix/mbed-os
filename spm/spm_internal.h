@@ -110,7 +110,7 @@ typedef __PACKED_STRUCT spm_pending_connect_msg {
  * Structure containing data sent from NSPE for closing a connection.
  */
 typedef __PACKED_STRUCT spm_pending_close_msg {
-    psa_error_t rc; /* Return code to be filled by the Root of Trust Service.*/
+    psa_handle_t handle;               /* Handle of channel to be closed */
     osSemaphoreId_t completion_sem_id; /* Semaphore to be released at the end of execution */
 } __ALIGNED(4) spm_pending_close_msg_t;
 
@@ -241,6 +241,14 @@ void psa_connect_async(uint32_t sid, spm_pending_connect_msg_t *msg);
  * @param[in] msg - pointer to call message struct
  */
 void psa_call_async(psa_handle_t handle, spm_pending_call_msg_t *msg);
+
+/*
+ * Validates parameters sent from caller and queues a disconnect message on the correct ROT_SRV.
+ *
+ * @param[in] handle - handle of channel to close
+ * @param[in] msg - pointer to close message struct
+ */
+void psa_close_async(psa_handle_t handle, spm_pending_close_msg_t *msg);
 
 
 /*

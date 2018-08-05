@@ -477,9 +477,7 @@ void psa_reply(psa_handle_t msg_handle, psa_error_t status)
             // Channel creation fails on resource exhaustion and handle will be created
             // only after a successful memory allocation and is not expected to fail.
             {
-                // Handle resides in msg_ptr because psa_close is asynchronous
-                psa_handle_t channel_handle = (psa_handle_t)active_channel->msg_ptr;
-                destroy_channel_handle(channel_handle);
+                destroy_channel_handle(close_msg_data->handle);
 
                 memset(active_channel, 0, sizeof(*active_channel));
                 osStatus_t os_status = osMemoryPoolFree(g_spm.channel_mem_pool, active_channel);
