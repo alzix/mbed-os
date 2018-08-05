@@ -656,33 +656,6 @@ PSA_TEST_SERVER(doorbell_test)
     return test_status;
 }
 
-PSA_TEST_SERVER(psa_reply_on_NULL_HANDLE)
-{
-    psa_error_t test_status = PSA_SUCCESS;
-    psa_error_t disconnect_status = PSA_SUCCESS;
-    psa_msg_t msg = {0};
-
-    uint32_t signals = psa_wait_any(PSA_BLOCK);
-    if ((signals & TEST_MSK) == 0) {
-        test_status = PSA_TEST_ERROR;
-    }
-
-    psa_get(TEST_MSK, &msg);
-    if (msg.type != PSA_IPC_CONNECT) {
-        test_status = ((test_status != PSA_SUCCESS) ? test_status : PSA_TEST_ERROR);
-    }
-
-    *status_ptr = (msg.handle != PSA_NULL_HANDLE) ? PSA_SUCCESS : PSA_TEST_ERROR;
-
-    psa_reply(PSA_NULL_HANDLE, PSA_SUCCESS);
-    psa_reply(msg.handle, PSA_SUCCESS);
-
-    disconnect_status = proccess_disconnect_request();
-    test_status  = (test_status != PSA_SUCCESS) ? test_status : disconnect_status;
-
-    return test_status;
-}
-
 
 psa_test_server_side_func test_list[] = {
     PSA_TEST_SERVER_NAME(wait_timeout),
@@ -698,6 +671,5 @@ psa_test_server_side_func test_list[] = {
     PSA_TEST_SERVER_NAME(rhandle_factorial),
     PSA_TEST_SERVER_NAME(cross_partition_call),
     PSA_TEST_SERVER_NAME(doorbell_test),
-    PSA_TEST_SERVER_NAME(psa_reply_on_NULL_HANDLE),
     NULL
 };

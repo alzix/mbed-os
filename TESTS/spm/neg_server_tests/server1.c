@@ -81,7 +81,20 @@ void server_main1(void *ptr)
                     TEST_FAIL_MESSAGE("server_write_from_outvec_index_size_0 negative test failed");
                 }
                 default: {
-                    TEST_FAIL_MESSAGE("server_write_from_outvec_index_size_0msg type failure");
+                    TEST_FAIL_MESSAGE("server_write_from_outvec_index_size_0 msg type failure");
+                }
+            }
+        }
+        else if (signals & PART1_REPLY_NULL_HANDLE_MSK) {
+            psa_get(PART1_REPLY_NULL_HANDLE_MSK, &msg);
+            switch (msg.type) {
+                case PSA_IPC_CONNECT: {
+                    psa_reply(PSA_NULL_HANDLE, PSA_CONNECTION_ACCEPTED);
+                    TEST_FAIL_MESSAGE("server_reply_null_handle negative test failed");
+                    break;
+                }
+                default: {
+                    TEST_FAIL_MESSAGE("server_reply_null_handle msg type failure");
                 }
             }
         }

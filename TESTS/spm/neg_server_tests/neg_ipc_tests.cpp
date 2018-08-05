@@ -230,6 +230,14 @@ void server_write_null_handle()
     TEST_FAIL_MESSAGE("server_write_null_handle negative test failed at client side");
 }
 
+//Testing server reply with a null handle
+void server_reply_null_handle()
+{
+    psa_connect(PART1_REPLY_NULL_HANDLE, MINOR_VER);
+
+    TEST_FAIL_MESSAGE("server_reply_null_handle negative test failed at client side");
+}
+
 //Testing server reply handle does not exist on the platform
 void server_reply_invalid_handle()
 {
@@ -381,6 +389,7 @@ PSA_NEG_TEST(server_write_null_buffer)
 PSA_NEG_TEST(server_write_rx_buff_null)
 PSA_NEG_TEST(server_write_invalid_handle)
 PSA_NEG_TEST(server_write_null_handle)
+PSA_NEG_TEST(server_reply_null_handle)
 PSA_NEG_TEST(server_reply_invalid_handle)
 PSA_NEG_TEST(server_reply_invalid_retval_connect)
 PSA_NEG_TEST(server_reply_invalid_retval_call)
@@ -428,6 +437,7 @@ Case cases[] = {
     SPM_UTEST_CASE("Testing server write rx_buff is null", server_write_rx_buff_null),
     SPM_UTEST_CASE("Testing server write handle does not exist on the platform", server_write_invalid_handle),
     SPM_UTEST_CASE("Testing server write handle is PSA_NULL_HANDLE", server_write_null_handle),
+    SPM_UTEST_CASE("Testing server reply with PSA_NULL_HANDLE", server_reply_null_handle),
     SPM_UTEST_CASE("Testing server reply handle does not exist on the platform", server_reply_invalid_handle),
     SPM_UTEST_CASE("Testing server reply invalid retval for connect", server_reply_invalid_retval_connect),
     SPM_UTEST_CASE("Testing server reply invalid retval for call", server_reply_invalid_retval_call),

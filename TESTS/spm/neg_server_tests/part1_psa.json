@@ -37,6 +37,14 @@
       "non_secure_clients": true,
       "minor_version": 5,
       "minor_policy": "RELAXED"
+    },
+    {
+      "name": "PART1_REPLY_NULL_HANDLE",
+      "identifier": "0x00001A29",
+      "signal": "PART1_REPLY_NULL_HANDLE_MSK",
+      "non_secure_clients": true,
+      "minor_version": 5,
+      "minor_policy": "RELAXED"
     }
   ],
   "source_files": [

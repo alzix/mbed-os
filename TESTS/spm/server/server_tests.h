@@ -53,5 +53,4 @@ PSA_TEST(skip_more_than_left)
 PSA_TEST(rhandle_factorial)
 PSA_TEST(cross_partition_call)
 PSA_TEST(doorbell_test)
-PSA_TEST(psa_reply_on_NULL_HANDLE)
 #endif /* __UVISOR_MBED_SPM_SERVER_TESTS_H__ */
