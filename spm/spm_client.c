@@ -269,10 +269,7 @@ void psa_close_async(psa_handle_t handle, spm_pending_close_msg_t *msg)
 
     spm_ipc_channel_t *channel = get_channel_from_handle(handle);
 
-    channel_state_switch( &channel->state,
-                          SPM_CHANNEL_STATE_IDLE,
-                          SPM_CHANNEL_STATE_INVALID
-                        );
+    channel_state_assert(&(channel->state), SPM_CHANNEL_STATE_IDLE);
 
     channel->msg_ptr  = msg;
     channel->msg_type = PSA_IPC_DISCONNECT;

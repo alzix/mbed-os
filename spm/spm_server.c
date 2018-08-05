@@ -293,27 +293,9 @@ void psa_get(psa_signal_t signum, psa_msg_t *msg)
         {
             channel_state_assert(
                 &curr_channel->state,
-                SPM_CHANNEL_STATE_INVALID
+                SPM_CHANNEL_STATE_IDLE
             );
-
-            msg->handle = PSA_NULL_HANDLE;
-            msg->type = PSA_IPC_DISCONNECT;
-            msg->rhandle = curr_channel->rhandle;
-
-            // !!!!!NOTE!!!!! handles must be destroyed before osMemoryPoolFree().
-            // Channel creation fails on resource exhaustion and handle will be created
-            // only after a successful memory allocation and is not expected to fail.
-            {
-                // Handle resides in msg_ptr because psa_close is asynchronous
-                psa_handle_t channel_handle = (psa_handle_t)curr_channel->msg_ptr;
-                destroy_channel_handle(channel_handle);
-
-                memset(curr_channel, 0, sizeof(*curr_channel));
-                osStatus_t os_status = osMemoryPoolFree(g_spm.channel_mem_pool, curr_channel);
-                SPM_ASSERT(osOK == os_status);
-                PSA_UNUSED(os_status);
-            }
-            return;
+            break;
         }
         default:
             SPM_PANIC("psa_get - unexpected message type=0x%08X", curr_channel->msg_type);
@@ -405,7 +387,7 @@ void psa_write(psa_handle_t msg_handle, uint32_t outvec_idx, const void *buffer,
     return;
 }
 
-void psa_reply(psa_handle_t msg_handle, psa_error_t retval)
+void psa_reply(psa_handle_t msg_handle, psa_error_t status)
 {
     spm_active_msg_t *active_msg = get_msg_from_handle(msg_handle);
     spm_ipc_channel_t *active_channel = active_msg->channel;
@@ -428,13 +410,14 @@ void psa_reply(psa_handle_t msg_handle, psa_error_t retval)
     switch (active_channel->msg_type) {
         case PSA_IPC_CONNECT:
         {
-            if ((retval != PSA_CONNECTION_ACCEPTED) && (retval != PSA_CONNECTION_REFUSED)) {
-                SPM_PANIC("retval (0X%08x) is not allowed for PSA_IPC_CONNECT", retval);
+            if ((status != PSA_CONNECTION_ACCEPTED) && (status != PSA_CONNECTION_REFUSED)) {
+                SPM_PANIC("status (0X%08x) is not allowed for PSA_IPC_CONNECT", status);
             }
 
             spm_pending_connect_msg_t *connect_msg_data  = (spm_pending_connect_msg_t *)(active_channel->msg_ptr);
+            SPM_ASSERT(connect_msg_data != NULL);
             completion_sem_id = connect_msg_data->completion_sem_id;
-            if (retval == PSA_CONNECTION_REFUSED) {
+            if (status == PSA_CONNECTION_REFUSED) {
                 channel_state_assert(&active_channel->state, SPM_CHANNEL_STATE_CONNECTING);
                 // !!!!!NOTE!!!!! handles must be destroyed before osMemoryPoolFree().
                 // Channel creation fails on resource exhaustion and handle will be created
@@ -452,7 +435,7 @@ void psa_reply(psa_handle_t msg_handle, psa_error_t retval)
                     PSA_UNUSED(os_status);
                 }
                 // Replace the handle we created in the user's memory with the error code
-                connect_msg_data->rc = retval;
+                connect_msg_data->rc = status;
                 active_channel = NULL;
             } else {
                 channel_state_switch(&active_channel->state,
@@ -462,26 +445,50 @@ void psa_reply(psa_handle_t msg_handle, psa_error_t retval)
         }
         case PSA_IPC_CALL:
         {
-            if ((retval >= PSA_RESERVED_ERROR_MIN) && (retval <= PSA_RESERVED_ERROR_MAX)) {
-                SPM_PANIC("retval (0X%08x) is not allowed for PSA_IPC_CALL", retval);
+            if ((status >= PSA_RESERVED_ERROR_MIN) && (status <= PSA_RESERVED_ERROR_MAX)) {
+                SPM_PANIC("status (0X%08x) is not allowed for PSA_IPC_CALL", status);
             }
 
             channel_state_switch(&active_channel->state,
                     SPM_CHANNEL_STATE_ACTIVE, SPM_CHANNEL_STATE_IDLE);
 
-            if (retval == PSA_DROP_CONNECTION) {
+            if (status == PSA_DROP_CONNECTION) {
                 active_channel->is_dropped = TRUE;
             }
 
             spm_pending_call_msg_t *call_msg_data = (spm_pending_call_msg_t *)(active_channel->msg_ptr);
-            call_msg_data->rc = retval;
+            SPM_ASSERT(call_msg_data != NULL);
+            call_msg_data->rc = status;
             completion_sem_id = call_msg_data->completion_sem_id;
             break;
         }
         case PSA_IPC_DISCONNECT:
         {
-            // If the message type is PSA_IPC_DISCONNECT then the status code is ignored
+            spm_pending_close_msg_t *close_msg_data = (spm_pending_close_msg_t *)(active_channel->msg_ptr);
+            SPM_ASSERT(close_msg_data != NULL);
+            completion_sem_id = close_msg_data->completion_sem_id;
+
+            channel_state_switch( &(active_channel->state),
+                                  SPM_CHANNEL_STATE_IDLE,
+                                  SPM_CHANNEL_STATE_INVALID
+                                );
+
+            // !!!!!NOTE!!!!! handles must be destroyed before osMemoryPoolFree().
+            // Channel creation fails on resource exhaustion and handle will be created
+            // only after a successful memory allocation and is not expected to fail.
+            {
+                // Handle resides in msg_ptr because psa_close is asynchronous
+                psa_handle_t channel_handle = (psa_handle_t)active_channel->msg_ptr;
+                destroy_channel_handle(channel_handle);
+
+                memset(active_channel, 0, sizeof(*active_channel));
+                osStatus_t os_status = osMemoryPoolFree(g_spm.channel_mem_pool, active_channel);
+                SPM_ASSERT(osOK == os_status);
+                PSA_UNUSED(os_status);
+            }
             break;
+
+            // Note: The status code is ignored for PSA_IPC_DISCONNECT message type
         }
         default:
             SPM_PANIC("psa_reply() - Unexpected message type=0x%08X", active_channel->msg_type);
