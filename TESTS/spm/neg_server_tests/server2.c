@@ -220,20 +220,16 @@ void server_main2(void *ptr)
             psa_reply(invalid_handle, PSA_SUCCESS);
             TEST_FAIL_MESSAGE("server_reply_invalid_handle negative test failed");
         }
-        else if (signals & PART2_SET_RHANDLE_DURING_DISCONNECT_MSK) {
-            psa_get(PART2_SET_RHANDLE_DURING_DISCONNECT_MSK, &msg);
+        else if (signals & PART2_REPLY_NULL_HANDLE_MSK) {
+            psa_get(PART2_REPLY_NULL_HANDLE_MSK, &msg);
             switch (msg.type) {
                 case PSA_IPC_CONNECT: {
-                    psa_reply(msg.handle, PSA_SUCCESS);
+                    psa_reply(PSA_NULL_HANDLE, PSA_CONNECTION_ACCEPTED);
+                    TEST_FAIL_MESSAGE("server_reply_null_handle negative test failed");
                     break;
                 }
-                case PSA_IPC_DISCONNECT: {
-                    uint32_t rhandle = 10;
-                    psa_set_rhandle(msg.handle, &rhandle);
-                    TEST_FAIL_MESSAGE("server_set_rhandle_during_disconnect negative test failed");
-                }
                 default: {
-                    TEST_FAIL_MESSAGE("server_set_rhandle_during_disconnect msg type failure");
+                    TEST_FAIL_MESSAGE("server_reply_null_handle msg type failure");
                 }
             }
         }

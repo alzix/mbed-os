@@ -233,7 +233,7 @@ void server_write_null_handle()
 //Testing server reply with a null handle
 void server_reply_null_handle()
 {
-    psa_connect(PART1_REPLY_NULL_HANDLE, MINOR_VER);
+    psa_connect(PART2_REPLY_NULL_HANDLE, MINOR_VER);
 
     TEST_FAIL_MESSAGE("server_reply_null_handle negative test failed at client side");
 }
@@ -262,17 +262,6 @@ void server_reply_invalid_retval_call()
     psa_call(handle, NULL, 0, NULL, 0);
 
     TEST_FAIL_MESSAGE("server_reply_invalid_retval_call negative test failed at client side");
-}
-
-//Testing server end rhandle is not NULL and msg type is disconnect
-void server_set_rhandle_during_disconnect()
-{
-    psa_handle_t handle = negative_server_ipc_tests_connect(PART2_SET_RHANDLE_DURING_DISCONNECT, MINOR_VER);
-
-    psa_close(handle);
-    // Wait for psa_close to finish on server side
-    osDelay(50);
-    TEST_FAIL_MESSAGE("server_set_rhandle_during_disconnect negative test failed at client side");
 }
 
 //Testing server notify partition id doesnt exist
@@ -393,7 +382,6 @@ PSA_NEG_TEST(server_reply_null_handle)
 PSA_NEG_TEST(server_reply_invalid_handle)
 PSA_NEG_TEST(server_reply_invalid_retval_connect)
 PSA_NEG_TEST(server_reply_invalid_retval_call)
-PSA_NEG_TEST(server_set_rhandle_during_disconnect)
 PSA_NEG_TEST(server_notify_part_id_invalid)
 PSA_NEG_TEST(server_psa_identity_invalid_handle)
 PSA_NEG_TEST(server_psa_identity_null_handle)
@@ -441,7 +429,6 @@ Case cases[] = {
     SPM_UTEST_CASE("Testing server reply handle does not exist on the platform", server_reply_invalid_handle),
     SPM_UTEST_CASE("Testing server reply invalid retval for connect", server_reply_invalid_retval_connect),
     SPM_UTEST_CASE("Testing server reply invalid retval for call", server_reply_invalid_retval_call),
-    SPM_UTEST_CASE("Testing server set rhandle during disconnect", server_set_rhandle_during_disconnect),
     SPM_UTEST_CASE("Testing server notify partition id does not exist", server_notify_part_id_invalid),
     SPM_UTEST_CASE("Testing server identify handle does not exist on the platform", server_psa_identity_invalid_handle),
     SPM_UTEST_CASE("Testing server identify handle is PSA_NULL_HANDLE", server_psa_identity_null_handle),

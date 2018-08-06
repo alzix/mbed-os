@@ -502,6 +502,10 @@ PSA_TEST_SERVER(rhandle_factorial)
                 SPM_PANIC("rhandle value changed between calls\n");
             }
 
+            // Setting rhandle during disconnection should have no effect
+            uint8_t my_rhandle = 10;
+            psa_set_rhandle(msg.handle, &my_rhandle);
+
             free(msg.rhandle);
             disconnect_count++;
             break;

@@ -85,19 +85,6 @@ void server_main1(void *ptr)
                 }
             }
         }
-        else if (signals & PART1_REPLY_NULL_HANDLE_MSK) {
-            psa_get(PART1_REPLY_NULL_HANDLE_MSK, &msg);
-            switch (msg.type) {
-                case PSA_IPC_CONNECT: {
-                    psa_reply(PSA_NULL_HANDLE, PSA_CONNECTION_ACCEPTED);
-                    TEST_FAIL_MESSAGE("server_reply_null_handle negative test failed");
-                    break;
-                }
-                default: {
-                    TEST_FAIL_MESSAGE("server_reply_null_handle msg type failure");
-                }
-            }
-        }
         else {
             SPM_ASSERT(false);
         }
