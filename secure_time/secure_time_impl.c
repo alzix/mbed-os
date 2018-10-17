@@ -406,7 +406,19 @@ uint64_t secure_time_get_impl(void)
 {
     uint64_t boot_time = secure_time_get_boot_time();
     uint64_t secs_since_boot = secure_time_get_seconds_since_boot();
-    return (boot_time > 0) ? (boot_time + secs_since_boot) : 0;
+
+    // If boot_time is valid (not 0), we can return boot_time + secs_since_boot as current time.
+    // Otherwise, the best estimation we have is the stored_time + secs_since_boot.
+    if(boot_time > 0) {
+        return boot_time + secs_since_boot;
+    }
+    else {
+        // Read the current stored time from secure storage
+        uint64_t stored_time = 0;
+        secure_time_get_stored_time(&stored_time);
+
+        return stored_time + secs_since_boot;
+    }
 }
 
 #endif // SECURE_TIME_ENABLED
