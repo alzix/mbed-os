@@ -39,7 +39,7 @@ static psa_error_t storage_set(psa_msg_t *msg)
         return PSA_ITS_ERROR_STORAGE_FAILURE;
     }
 
-    add_headers_to_record(data, flags, psa_identity(msg->handle));
+    add_headers_to_record(data, flags);
 
 
     if (psa_read(msg->handle, 1, PITS_DATA_PTR(data), msg->in_size[1]) != msg->in_size[1]) {
@@ -76,7 +76,7 @@ static psa_error_t storage_get(psa_msg_t *msg)
         return PSA_ITS_ERROR_STORAGE_FAILURE;
     }
 
-    psa_its_status_t status = psa_its_get_impl(key, offset, msg->out_size[0], data, psa_identity(msg->handle));
+    psa_its_status_t status = psa_its_get_impl(key, offset, msg->out_size[0], data);
     if (status == PSA_ITS_SUCCESS) {
         psa_write(msg->handle, 0, data, msg->out_size[0]);
     }
@@ -119,7 +119,7 @@ static psa_error_t storage_remove(psa_msg_t *msg)
         return PSA_DROP_CONNECTION;
     }
 
-    return psa_its_remove_impl(key, psa_identity(msg->handle));
+    return psa_its_remove_impl(key);
 }
 
 static void message_handler(psa_msg_t *msg, SignalHandler handler)

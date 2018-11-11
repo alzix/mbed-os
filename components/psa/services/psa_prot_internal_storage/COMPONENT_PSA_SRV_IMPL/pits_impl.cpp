@@ -13,7 +13,7 @@ static bool validate_file_id(uint32_t uid)
     return ((uid & ((uint32_t)0xFFFF0000)) == 0);
 }
 
-static psa_its_status_t get_key_header(uint32_t uid, pits_source_t *source, psa_its_create_flags_t *flags, uint32_t *size)
+static psa_its_status_t get_key_header(uint32_t uid, psa_its_create_flags_t *flags, uint32_t *size)
 {
     uint16_t actual_size = 0;
     psa_its_status_t res = PSA_ITS_SUCCESS;
@@ -28,9 +28,6 @@ static psa_its_status_t get_key_header(uint32_t uid, pits_source_t *source, psa_
 
         status = nvstore.get(uid, actual_size, data, actual_size);
         if (status == NVSTORE_SUCCESS) {
-            if (source != NULL) {
-                *source = *(pits_source_t *)PITS_ACL_PTR(data);
-            }
             if (flags != NULL) {
                 *flags = *(psa_its_create_flags_t *)PITS_FLAGS_PTR(data);
             }
@@ -50,9 +47,8 @@ static psa_its_status_t get_key_header(uint32_t uid, pits_source_t *source, psa_
     return res;
 }
 
- void add_headers_to_record(void *record, psa_its_create_flags_t create_flags, pits_source_t source)
+ void add_headers_to_record(void *record, psa_its_create_flags_t create_flags)
 {
-    memcpy(PITS_ACL_PTR(record), &source, sizeof(source));
     memcpy(PITS_FLAGS_PTR(record), &create_flags, sizeof(create_flags));
 }
 
@@ -95,7 +91,7 @@ psa_its_status_t psa_its_set_impl(uint32_t uid, uint32_t data_length, const void
     return status;
 }
 
-psa_its_status_t psa_its_get_impl(uint32_t uid, uint32_t data_offset, uint32_t data_length, void *p_data, pits_source_t source)
+psa_its_status_t psa_its_get_impl(uint32_t uid, uint32_t data_offset, uint32_t data_length, void *p_data)
 {
     if (!validate_file_id(uid)) {
         return PSA_ITS_ERROR_INVALID_KEY;
@@ -150,21 +146,14 @@ psa_its_status_t psa_its_get_impl(uint32_t uid, uint32_t data_offset, uint32_t d
             break;
     }
 
-    if (source != *(pits_source_t *)(PITS_ACL_PTR(record))) {
-        memset(record, 0, data_size);
-        free(record);
-        return PSA_ITS_ERROR_KEY_NOT_FOUND;
-    }
-
     memcpy(p_data, PITS_DATA_PTR_AT_OFFSET(record, data_offset), data_length);
     free(record);
 
     return PSA_ITS_SUCCESS;
 }
 
-psa_its_status_t psa_its_get_info_impl(uint32_t uid, struct psa_its_info_t *p_info, pits_source_t source)
+psa_its_status_t psa_its_get_info_impl(uint32_t uid, struct psa_its_info_t *p_info)
 {
-    pits_source_t record_source;
     psa_its_create_flags_t flags;
     uint32_t size;
 
@@ -172,13 +161,9 @@ psa_its_status_t psa_its_get_info_impl(uint32_t uid, struct psa_its_info_t *p_in
         return PSA_ITS_ERROR_INVALID_KEY;
     }
 
-    psa_its_status_t status = get_key_header(uid, &record_source, &flags, &size);
+    psa_its_status_t status = get_key_header(uid, &flags, &size);
     if (status != PSA_ITS_SUCCESS) {
         return status;
-    }
-
-    if (source != record_source) {
-        return PSA_ITS_ERROR_KEY_NOT_FOUND;
     }
 
     p_info->size = size;
@@ -187,9 +172,8 @@ psa_its_status_t psa_its_get_info_impl(uint32_t uid, struct psa_its_info_t *p_in
     return PSA_ITS_SUCCESS;
 }
 
-psa_its_status_t psa_its_remove_impl(uint32_t uid, pits_source_t source)
+psa_its_status_t psa_its_remove_impl(uint32_t uid)
 {
-    pits_source_t record_source = 0;
     psa_its_create_flags_t flags = 0;
     NVStore &nvstore = NVStore::get_instance();
 
@@ -197,15 +181,10 @@ psa_its_status_t psa_its_remove_impl(uint32_t uid, pits_source_t source)
         return PSA_ITS_ERROR_INVALID_KEY;
     }
 
-    psa_its_status_t status = get_key_header(uid, &record_source, &flags, NULL);
+    psa_its_status_t status = get_key_header(uid, &flags, NULL);
     if (status != PSA_ITS_SUCCESS) {
         return status;
     }
-
-    if (source != record_source) {
-        return PSA_ITS_ERROR_KEY_NOT_FOUND;
-    }
-
 
     if (nvstore.remove((uint16_t)uid) != NVSTORE_SUCCESS) {
         return PSA_ITS_ERROR_STORAGE_FAILURE;
