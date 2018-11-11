@@ -47,7 +47,7 @@ static psa_error_t storage_set(psa_msg_t *msg)
         return PSA_ITS_ERROR_STORAGE_FAILURE;
     }
 
-    psa_its_status_t status = psa_its_set_impl(key, alloc_size, data, flags);
+    psa_its_status_t status = psa_its_set_impl(psa_identity(msg_>handle), key, alloc_size, data, flags);
 
     memset(data, 0, alloc_size);
     free(data);
@@ -76,7 +76,7 @@ static psa_error_t storage_get(psa_msg_t *msg)
         return PSA_ITS_ERROR_STORAGE_FAILURE;
     }
 
-    psa_its_status_t status = psa_its_get_impl(key, offset, msg->out_size[0], data);
+    psa_its_status_t status = psa_its_get_impl(psa_identity(msg_>handle), key, offset, msg->out_size[0], data);
     if (status == PSA_ITS_SUCCESS) {
         psa_write(msg->handle, 0, data, msg->out_size[0]);
     }
@@ -99,7 +99,7 @@ static psa_error_t storage_info(psa_msg_t *msg)
         return PSA_DROP_CONNECTION;
     }
 
-    psa_its_status_t status = psa_its_get_info_impl(key, &info, psa_identity(msg->handle));
+    psa_its_status_t status = psa_its_get_info_impl(psa_identity(msg_>handle), key, &info, psa_identity(msg->handle));
     if (status == PSA_ITS_SUCCESS) {
         psa_write(msg->handle, 0, &info, msg->out_size[0]);
     }
@@ -119,7 +119,7 @@ static psa_error_t storage_remove(psa_msg_t *msg)
         return PSA_DROP_CONNECTION;
     }
 
-    return psa_its_remove_impl(key);
+    return psa_its_remove_impl(psa_identity(msg_>handle), key);
 }
 
 static void message_handler(psa_msg_t *msg, SignalHandler handler)

@@ -8,9 +8,41 @@ extern "C"
 {
 #endif
 
-static bool validate_file_id(uint32_t uid)
+const uint8_t fn_coding_table[] = {
+    '0', '1', '2', '3', '4', '5', '6', '7',
+    '8', '9', 'a', 'b', 'c', 'd', 'e', 'f',
+    'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
+    'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
+    'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D',
+    'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
+    'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
+    'U', 'V', 'W', 'X', 'Y', 'Z', '$', '@'
+};
+
+#define PSA_ITS_FILENAME_LEN_BYTES      14          // uid: 6; delimiter: 1; pid: 6; str terminator: 1
+
+static void generate_fn(uint8_t *tdb_filename, uint32_t uid, uint32_t pid)
 {
-    return ((uid & ((uint32_t)0xFFFF0000)) == 0);
+    // Note: tdb_filename assumed to be of size PSA_ITS_FILENAME_LEN_BYTES and reset with zeros
+
+    uint8_t filename_idx = 0;
+    uint32_t tmp_uid = uid;
+    uint32_t tmp_pid = pid;
+
+    // Iterate on UID; each time convert 6 bits of UID into a character; first iteration must be done
+    do {
+        tdb_filename[filename_idx++] = fn_coding_table[tmp_uid & 0x3F];
+        tmp_uid = tmp_uid >> 6;
+    } while (tmp_uid != 0);
+
+    // Write delimiter
+    tdb_filename[filename_idx++] = '#';
+
+    // Iterate on PID; each time convert 6 bits of PID into a character; first iteration must be done
+    do {
+        tdb_filename[filename_idx++] = fn_coding_table[tmp_pid & 0x3F];
+        tmp_pid = tmp_pid >> 6;
+    } while (tmp_pid != 0);
 }
 
 static psa_its_status_t get_key_header(uint32_t uid, psa_its_create_flags_t *flags, uint32_t *size)
@@ -52,20 +84,20 @@ static psa_its_status_t get_key_header(uint32_t uid, psa_its_create_flags_t *fla
     memcpy(PITS_FLAGS_PTR(record), &create_flags, sizeof(create_flags));
 }
 
-psa_its_status_t psa_its_set_impl(uint32_t uid, uint32_t data_length, const void *p_data, psa_its_create_flags_t create_flags)
+psa_its_status_t psa_its_set_impl(uint32_t pid, uint32_t uid, uint32_t data_length, const void *p_data, psa_its_create_flags_t create_flags)
 {
     psa_its_status_t status = PSA_ITS_SUCCESS;
 
-    if (!validate_file_id(uid)) {
-        return PSA_ITS_ERROR_INVALID_KEY;
-    }
+    uint8_t tdb_filename[PSA_ITS_FILENAME_LEN_BYTES] = {'\0'};
+    generate_fn(tdb_filename, uid, pid);
+
 
     NVStore &nvstore = NVStore::get_instance();
     int nvstore_status = 0;
     if (create_flags & PSA_ITS_WRITE_ONCE_FLAG) {
-        nvstore_status = nvstore.set_once((uint16_t)uid, data_length, p_data);
+        nvstore_status = nvstore.set_once(uid, data_length, p_data);
     } else {
-        nvstore_status = nvstore.set((uint16_t)uid, data_length, p_data);
+        nvstore_status = nvstore.set(uid, data_length, p_data);
     }
 
     switch(nvstore_status) {
@@ -91,16 +123,15 @@ psa_its_status_t psa_its_set_impl(uint32_t uid, uint32_t data_length, const void
     return status;
 }
 
-psa_its_status_t psa_its_get_impl(uint32_t uid, uint32_t data_offset, uint32_t data_length, void *p_data)
+psa_its_status_t psa_its_get_impl(uint32_t pid, uint32_t uid, uint32_t data_offset, uint32_t data_length, void *p_data)
 {
-    if (!validate_file_id(uid)) {
-        return PSA_ITS_ERROR_INVALID_KEY;
-    }
-
     NVStore &nvstore = NVStore::get_instance();
     uint16_t data_size = 0;
+    uint8_t tdb_filename[PSA_ITS_FILENAME_LEN_BYTES] = {'\0'};
 
-    int nvstore_status = nvstore.get_item_size((uint16_t)uid, data_size);
+    generate_fn(tdb_filename, uid, pid);
+
+    int nvstore_status = nvstore.get_item_size(uid, data_size);
     switch(nvstore_status) {
         case NVSTORE_SUCCESS:
             break;
@@ -130,7 +161,7 @@ psa_its_status_t psa_its_get_impl(uint32_t uid, uint32_t data_offset, uint32_t d
         return PSA_ITS_ERROR_STORAGE_FAILURE;
     }
 
-    nvstore_status = nvstore.get((uint16_t)uid, data_size, record, data_size);
+    nvstore_status = nvstore.get(uid, data_size, record, data_size);
     switch(nvstore_status) {
         case NVSTORE_SUCCESS:
             break;
@@ -152,14 +183,13 @@ psa_its_status_t psa_its_get_impl(uint32_t uid, uint32_t data_offset, uint32_t d
     return PSA_ITS_SUCCESS;
 }
 
-psa_its_status_t psa_its_get_info_impl(uint32_t uid, struct psa_its_info_t *p_info)
+psa_its_status_t psa_its_get_info_impl(uint32_t pid, uint32_t uid, struct psa_its_info_t *p_info)
 {
     psa_its_create_flags_t flags;
     uint32_t size;
+    uint8_t tdb_filename[PSA_ITS_FILENAME_LEN_BYTES] = {'\0'};
 
-    if (!validate_file_id(uid)) {
-        return PSA_ITS_ERROR_INVALID_KEY;
-    }
+    generate_fn(tdb_filename, uid, pid);
 
     psa_its_status_t status = get_key_header(uid, &flags, &size);
     if (status != PSA_ITS_SUCCESS) {
@@ -172,21 +202,21 @@ psa_its_status_t psa_its_get_info_impl(uint32_t uid, struct psa_its_info_t *p_in
     return PSA_ITS_SUCCESS;
 }
 
-psa_its_status_t psa_its_remove_impl(uint32_t uid)
+psa_its_status_t psa_its_remove_impl(uint32_t pid, uint32_t uid)
 {
     psa_its_create_flags_t flags = 0;
     NVStore &nvstore = NVStore::get_instance();
 
-    if (!validate_file_id(uid)) {
-        return PSA_ITS_ERROR_INVALID_KEY;
-    }
+    uint8_t tdb_filename[PSA_ITS_FILENAME_LEN_BYTES] = {'\0'};
+
+    generate_fn(tdb_filename, uid, pid);
 
     psa_its_status_t status = get_key_header(uid, &flags, NULL);
     if (status != PSA_ITS_SUCCESS) {
         return status;
     }
 
-    if (nvstore.remove((uint16_t)uid) != NVSTORE_SUCCESS) {
+    if (nvstore.remove(uid) != NVSTORE_SUCCESS) {
         return PSA_ITS_ERROR_STORAGE_FAILURE;
     }
 
