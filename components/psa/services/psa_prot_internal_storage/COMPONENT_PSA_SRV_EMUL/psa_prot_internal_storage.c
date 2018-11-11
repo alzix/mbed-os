@@ -1,3 +1,6 @@
+#include <stdlib.h>
+#include <string.h>
+
 #include "psa_prot_internal_storage.h"
 #include "pits_impl.h"
 
