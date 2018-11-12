@@ -9,5 +9,13 @@
             "help": "A string name for the default kvstore configuration",
             "value": "kv"
         }
+    },
+    "target_overrides": {
+        "K64F": {
+            "storage_type": "TDB_INTERNAL"
+        },
+        "FUTURE_SEQUANA_M0_PSA": {
+            "storage_type": "TDB_INTERNAL"
+        }
     }
 }
