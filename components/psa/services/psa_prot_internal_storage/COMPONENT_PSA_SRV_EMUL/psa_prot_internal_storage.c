@@ -14,25 +14,7 @@ psa_its_status_t psa_its_set(uint32_t uid, uint32_t data_length, const void *p_d
         return PSA_ITS_ERROR_BAD_POINTER;
     }
 
-    const uint32_t extended_length = data_length + PITS_HEADER_SIZE;
-
-    // Make sure add operation does not wrap UINT32_MAX
-    if(extended_length < data_length) {
-       return PSA_ITS_ERROR_INSUFFICIENT_SPACE;
-    }
-
-    uint8_t *record = (uint8_t *)malloc(extended_length);
-    if (record == NULL) {
-        return PSA_ITS_ERROR_STORAGE_FAILURE;
-    }
-
-    add_headers_to_record(record, create_flags);
-    memcpy(PITS_DATA_PTR(record), p_data, data_length);
-
-    psa_its_status_t res = psa_its_set_impl(PSA_ITS_EMUL_PID, uid, extended_length, record, create_flags);
-
-    memset(record, 0, extended_length);
-    free(record);
+    psa_its_status_t res = psa_its_set_impl(PSA_ITS_EMUL_PID, uid, data_length, p_data, create_flags);
 
     return res;
 }

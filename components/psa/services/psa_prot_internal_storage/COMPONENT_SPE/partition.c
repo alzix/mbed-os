@@ -1,4 +1,17 @@
-// -------------------------------------- Includes -----------------------------------
+/* Copyright (c) 2018 ARM Limited
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #include <string.h>
 #include "cmsis_os2.h"
@@ -7,6 +20,7 @@
 #include "psa_its_partition.h"
 #include "psa_prot_internal_storage.h"
 #include "pits_impl.h"
+#include "kv_config.h"
 
 #ifdef   __cplusplus
 extern "C"
@@ -19,7 +33,7 @@ static psa_error_t storage_set(psa_msg_t *msg)
 {
     uint32_t key = 0;
     void *data = NULL;
-    uint32_t alloc_size = msg->in_size[1] + PITS_HEADER_SIZE;
+    uint32_t alloc_size = msg->in_size[1];
     psa_its_create_flags_t flags = 0;
 
     if ((msg->in_size[0] != sizeof(key)) || (msg->in_size[2] != sizeof(flags))) {
@@ -39,10 +53,7 @@ static psa_error_t storage_set(psa_msg_t *msg)
         return PSA_ITS_ERROR_STORAGE_FAILURE;
     }
 
-    add_headers_to_record(data, flags);
-
-
-    if (psa_read(msg->handle, 1, PITS_DATA_PTR(data), msg->in_size[1]) != msg->in_size[1]) {
+    if (psa_read(msg->handle, 1, data, msg->in_size[1]) != msg->in_size[1]) {
         free(data);
         return PSA_ITS_ERROR_STORAGE_FAILURE;
     }
@@ -152,6 +163,15 @@ void pits_entry(void *ptr)
 
     while (1) {
         signals = psa_wait_any(PSA_BLOCK);
+
+        // KVStore initiation:
+        // - Must be done after the psa_wait_any() call since only now we know OS initialization is done
+        // - Repeating calls has no effect
+        int kv_status = kv_init_storage_config();
+        if(kv_status) {
+            SPM_PANIC("KVStore initiation failed with status %d!", kv_status);
+        }
+
         if ((signals & PSA_ITS_SET_MSK) != 0) {
             psa_get(PSA_ITS_SET_MSK, &msg);
             message_handler(&msg, storage_set);
