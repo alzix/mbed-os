@@ -19,7 +19,7 @@
 #include "TDBStore.h"
 #include "psa_prot_internal_storage.h"
 #include "pits_impl.h"
-#include "nvstore.h"
+
 #ifdef   __cplusplus
 extern "C"
 {
@@ -78,7 +78,7 @@ static void generate_fn(uint8_t *tdb_filename, uint32_t uid, uint32_t pid)
 psa_its_status_t psa_its_set_impl(uint32_t pid, uint32_t uid, uint32_t data_length, const void *p_data, psa_its_create_flags_t create_flags)
 {
     KVStore *kvstore = get_kvstore_instance();
-    if(!kvstore) {
+    if (!kvstore) {
         return PSA_ITS_ERROR_STORAGE_FAILURE;
     }
 
@@ -94,7 +94,7 @@ psa_its_status_t psa_its_set_impl(uint32_t pid, uint32_t uid, uint32_t data_leng
     int kvstore_status = kvstore->set((const char *)kv_key, p_data, data_length, kv_create_flags);
 
     psa_its_status_t status = PSA_ITS_SUCCESS;
-    if(kvstore_status != 0) {
+    if (kvstore_status != 0) {
         status = PSA_ITS_ERROR_STORAGE_FAILURE;
     }
 
@@ -103,64 +103,34 @@ psa_its_status_t psa_its_set_impl(uint32_t pid, uint32_t uid, uint32_t data_leng
 
 psa_its_status_t psa_its_get_impl(uint32_t pid, uint32_t uid, uint32_t data_offset, uint32_t data_length, void *p_data)
 {
-    NVStore &nvstore = NVStore::get_instance();
-
     KVStore *kvstore = get_kvstore_instance();
-    if(!kvstore) {
+    if (!kvstore) {
         return PSA_ITS_ERROR_STORAGE_FAILURE;
     }
 
-    uint16_t data_size = 0;
-    uint8_t tdb_filename[PSA_ITS_FILENAME_LEN_BYTES] = {'\0'};
+    // Generate KVStore key
+    uint8_t kv_key[PSA_ITS_FILENAME_LEN_BYTES] = {'\0'};
+    generate_fn(kv_key, uid, pid);
 
-    generate_fn(tdb_filename, uid, pid);
-
-    int nvstore_status = nvstore.get_item_size(uid, data_size);
-    switch(nvstore_status) {
-        case NVSTORE_SUCCESS:
-            break;
-        case NVSTORE_NOT_FOUND:
-            return PSA_ITS_ERROR_KEY_NOT_FOUND;
-            break;
-        case NVSTORE_READ_ERROR:
-        case NVSTORE_DATA_CORRUPT:
-            return PSA_ITS_ERROR_STORAGE_FAILURE;
-            break;
-        case NVSTORE_BAD_VALUE:
-            return PSA_ITS_ERROR_INVALID_KEY;
-        default:
-            break;
+    KVStore::info_t kv_info;
+    int kvstore_status = kvstore->get_info((const char *)kv_key, &kv_info);
+    if (kvstore_status) {
+        return PSA_ITS_ERROR_STORAGE_FAILURE;
     }
 
-    if (data_offset + data_length > data_size) {
+    if (data_offset + data_length > kv_info.size) {
         return PSA_ITS_ERROR_INCORRECT_SIZE;
     }
 
-    uint8_t *record = (uint8_t *)malloc(data_size);
-    if (record == NULL) {
-        return PSA_ITS_ERROR_STORAGE_FAILURE;
+    size_t actual_size = 0;
+    kvstore_status = kvstore->get((const char *)kv_key, p_data, data_length, &actual_size, data_offset);
+
+    psa_its_status_t status = PSA_ITS_SUCCESS;
+    if (kvstore_status == 0) {
+        status = PSA_ITS_ERROR_STORAGE_FAILURE;
     }
 
-    nvstore_status = nvstore.get(uid, data_size, record, data_size);
-    switch(nvstore_status) {
-        case NVSTORE_SUCCESS:
-            break;
-        case NVSTORE_NOT_FOUND:
-        case NVSTORE_READ_ERROR:
-        case NVSTORE_DATA_CORRUPT:
-        case NVSTORE_BUFF_TOO_SMALL:
-        case NVSTORE_BAD_VALUE:
-            free(record);
-            return PSA_ITS_ERROR_STORAGE_FAILURE;
-            break;
-        default:
-            break;
-    }
-
-    memcpy(p_data, PITS_DATA_PTR_AT_OFFSET(record, data_offset), data_length);
-    free(record);
-
-    return PSA_ITS_SUCCESS;
+    return status;
 }
 
 psa_its_status_t psa_its_get_info_impl(uint32_t pid, uint32_t uid, struct psa_its_info_t *p_info)
@@ -168,7 +138,7 @@ psa_its_status_t psa_its_get_info_impl(uint32_t pid, uint32_t uid, struct psa_it
     psa_its_status_t status = PSA_ITS_SUCCESS;
 
     KVStore *kvstore = get_kvstore_instance();
-    if(!kvstore) {
+    if (!kvstore) {
         return PSA_ITS_ERROR_STORAGE_FAILURE;
     }
 
@@ -181,7 +151,7 @@ psa_its_status_t psa_its_get_info_impl(uint32_t pid, uint32_t uid, struct psa_it
 
     if (kvstore_status == 0) {
         p_info->flags = 0;
-        if(kv_info.flags & KVStore::WRITE_ONCE_FLAG) {
+        if (kv_info.flags & KVStore::WRITE_ONCE_FLAG) {
             p_info->flags |= PSA_ITS_WRITE_ONCE_FLAG;
         }
         p_info->size = (uint32_t)(kv_info.size);   // kv_info.size is of type size_t
@@ -195,7 +165,7 @@ psa_its_status_t psa_its_get_info_impl(uint32_t pid, uint32_t uid, struct psa_it
 psa_its_status_t psa_its_remove_impl(uint32_t pid, uint32_t uid)
 {
     KVStore *kvstore = get_kvstore_instance();
-    if(!kvstore) {
+    if (!kvstore) {
         return PSA_ITS_ERROR_STORAGE_FAILURE;
     }
 
