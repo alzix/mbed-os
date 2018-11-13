@@ -4,6 +4,10 @@
 
 psa_its_status_t psa_its_set(uint32_t uid, uint32_t data_length, const void *p_data, psa_its_create_flags_t create_flags)
 {
+    if (!p_data && data_length) {
+        return PSA_ITS_ERROR_BAD_POINTER;
+    }
+
     psa_invec_t msg[3] = {
         { &uid, sizeof(uid) },
         { p_data, data_length },
@@ -24,8 +28,12 @@ psa_its_status_t psa_its_set(uint32_t uid, uint32_t data_length, const void *p_d
     return status;
 }
 
-psa_its_status_t psa_its_get(uint32_t uid, uint32_t data_offset,  uint32_t data_length, void *p_data)
+psa_its_status_t psa_its_get(uint32_t uid, uint32_t data_offset, uint32_t data_length, void *p_data)
 {
+    if (!p_data && data_length) {
+       return PSA_ITS_ERROR_BAD_POINTER;
+   }
+
     psa_invec_t msg[2] = {
         { &uid, sizeof(uid) },
         { &data_offset, sizeof(data_offset) }
@@ -49,6 +57,10 @@ psa_its_status_t psa_its_get(uint32_t uid, uint32_t data_offset,  uint32_t data_
 
 psa_its_status_t psa_its_get_info(uint32_t uid, struct psa_its_info_t *p_info)
 {
+    if (!p_info) {
+        return PSA_ITS_ERROR_BAD_POINTER;
+    }
+
     struct psa_its_info_t info = { 0 };
     psa_invec_t msg = { &uid, sizeof(uid) };
     psa_outvec_t resp = { &info, sizeof(info) };
@@ -58,9 +70,8 @@ psa_its_status_t psa_its_get_info(uint32_t uid, struct psa_its_info_t *p_info)
     }
 
     psa_error_t status = psa_call(conn, &msg, 1, &resp, 1);
-    if (NULL != p_info) {
-        *p_info = info;
-    }
+
+    *p_info = info;
 
     if (status == PSA_DROP_CONNECTION) {
         status = PSA_ITS_ERROR_STORAGE_FAILURE;

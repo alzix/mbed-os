@@ -21,6 +21,7 @@
 #include "psa_prot_internal_storage.h"
 #include "pits_impl.h"
 #include "kv_config.h"
+#include "mbed_error.h"
 
 #ifdef   __cplusplus
 extern "C"
@@ -168,7 +169,7 @@ void pits_entry(void *ptr)
         // - Must be done after the psa_wait_any() call since only now we know OS initialization is done
         // - Repeating calls has no effect
         int kv_status = kv_init_storage_config();
-        if(kv_status) {
+        if(kv_status != MBED_SUCCESS) {
             SPM_PANIC("KVStore initiation failed with status %d!", kv_status);
         }
 
