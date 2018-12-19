@@ -1,0 +1,101 @@
+#! armclang --target=arm-arm-none-eabi -march=armv8-m.main -E -xc
+
+/*
+ * Copyright (c) 2018 ARM Limited
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "../../../partition/region_defs.h"
+
+#if !defined(TFM_LVL)
+  #define TFM_LVL   1
+#endif
+
+LR_CODE S_CODE_START {
+
+    /****  This initial section contains common code for TEE */
+    ER_TFM_CODE S_CODE_START S_CODE_SIZE {
+        *.o (RESET +First)
+        .ANY (+RO)
+    }
+
+#if TFM_LVL == 1
+
+    ER_TFM_DATA S_DATA_START S_DATA_SIZE {
+        .ANY (+RW +ZI)
+    }
+
+    TFM_SECURE_STACK +0 ALIGN 128 EMPTY 0x2000 {
+    }
+
+    TFM_UNPRIV_SCRATCH +0 ALIGN 32 EMPTY 0x400 {
+    }
+
+#else /* TFM_LVL == 1 */
+
+    /**** Unprivileged Secure code start here */
+    TFM_UNPRIV_CODE +0 ALIGN 32 {
+        tfm_unpriv_api.o (+RO)
+        platform_retarget_dev.o (+RO)
+        *(SFN)
+        *armlib*
+    }
+
+    TFM_SP_PLATFORM +0 ALIGN 32 {
+        *tfm_platform* (+RO)
+        *(TFM_SP_PLATFORM_ATTR_FN)
+    }
+
+    ER_TFM_DATA S_DATA_START S_DATA_SIZE {
+        .ANY (+RW +ZI)
+    }
+
+    TFM_UNPRIV_RO_DATA +0 ALIGN 32 {
+        tfm_unpriv_api.o (+RW +ZI)
+        platform_retarget_dev.o (+RW +ZI)
+    }
+
+    TFM_UNPRIV_SCRATCH +0 ALIGN 32 EMPTY 0x400 {
+    }
+
+    TFM_SP_PLATFORM_DATA +0 ALIGN 32 {
+        *tfm_platform* (+RW +ZI)
+    }
+
+    TFM_SP_PLATFORM_STACK +0 ALIGN 128 EMPTY 0x0400 {
+    }
+
+#endif /* TFM_LVL == 1 */
+
+    ER_CODE_CMSE_VENEER CMSE_VENEER_REGION_START FIXED PADVALUE 0xFFFFFFFF CMSE_VENEER_REGION_SIZE {
+        *(Veneer$$CMSE)
+    }
+}
+
+/*
+LR_VENEER CMSE_VENEER_REGION_START {
+    ER_CODE_CMSE_VENEER CMSE_VENEER_REGION_START CMSE_VENEER_REGION_SIZE {
+        *(Veneer$$CMSE)
+    }
+}
+*/
+
+LR_NS_PARTITION NS_PARTITION_START {
+    /* Reserved place for NS application.
+     * No code will be placed here, just address of this region is used in the
+     * secure code to configure certain HW components.
+     */
+    ER_NS_PARTITION NS_PARTITION_START EMPTY NS_PARTITION_SIZE {
+    }
+}

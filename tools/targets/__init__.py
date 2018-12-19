@@ -591,6 +591,13 @@ class PSOC6Code:
         else:
             psoc6_complete(t_self, elf, binf)
 
+class ArmMuscaA1Code:
+    """Musca-A1 Hooks"""
+    @staticmethod
+    def binary_hook(t_self, resources, elf, binf):
+        from tools.targets.ARM_MUSCA_A1.ARM_MUSCA_A1_TFM import musca_tfm_bin
+        musca_tfm_bin(t_self, binf)
+
 ################################################################################
 
 # Instantiate all public targets
