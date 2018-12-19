@@ -1,0 +1,49 @@
+{
+  "files" : [
+    {
+      "src_file" : "secure_fw/ns_callable/tfm_platform_veneers.c",
+      "dest_file" : "components/TARGET_PSA/TARGET_TFM/COMPONENT_SPE/secure_fw/ns_callable/tfm_platform_veneers.c"
+    }
+  ],
+  "folders" : [
+    {
+      "src_folder" : "interface/include",
+      "dest_folder" : "components/TARGET_PSA/TARGET_TFM/interface/include"
+    },
+    {
+      "src_folder" : "interface/src",
+      "dest_folder" : "components/TARGET_PSA/TARGET_TFM/COMPONENT_NSPE/interface/src"
+    },
+    {
+      "src_folder" : "secure_fw/core",
+      "dest_folder" : "components/TARGET_PSA/TARGET_TFM/COMPONENT_SPE/secure_fw/core"
+    },
+    {
+      "src_folder" : "secure_fw/include",
+      "dest_folder" : "components/TARGET_PSA/TARGET_TFM/COMPONENT_SPE/secure_fw/include"
+    },
+    {
+      "src_folder" : "secure_fw/services",
+      "dest_folder" : "components/TARGET_PSA/TARGET_TFM/COMPONENT_SPE/secure_fw/services"
+    },
+    {
+      "src_folder" : "secure_fw/services/platform",
+      "dest_folder" : "components/TARGET_PSA/TARGET_TFM/COMPONENT_SPE/secure_fw/services/platform"
+    },
+    {
+      "src_folder" : "secure_fw/spm",
+      "dest_folder" : "components/TARGET_PSA/TARGET_TFM/COMPONENT_SPE/secure_fw/spm"
+    },
+    {
+      "src_folder" : "platform/ext/driver",
+      "dest_folder" : "components/TARGET_PSA/TARGET_TFM/COMPONENT_SPE/platform/ext/driver"
+    },
+    {
+      "src_folder" : "platform/include",
+      "dest_folder" : "components/TARGET_PSA/TARGET_TFM/COMPONENT_SPE/platform/include"
+    }
+  ],
+   "commit_sha" : [
+    ]
+}
+
