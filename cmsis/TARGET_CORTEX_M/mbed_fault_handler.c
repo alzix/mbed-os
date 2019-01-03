@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#ifndef MBED_FAULT_HANDLER_DISABLED
+
 #ifndef __STDC_FORMAT_MACROS
 #define __STDC_FORMAT_MACROS
 #endif
@@ -25,7 +27,6 @@
 #include "mbed_interface.h"
 #include "mbed_crash_data_offsets.h"
 
-#ifndef MBED_FAULT_HANDLER_DISABLED
 #include "mbed_fault_handler.h"
 
 //Functions Prototypes
