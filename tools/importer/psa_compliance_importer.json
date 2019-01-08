@@ -231,7 +231,7 @@
   {
     "src_folder": "dev_apis/crypto/test_c043/",
     "dest_folder": "TESTS/psa-compliance/test_c043/"
-  },
+  }
   
 ],
   "commit_sha": [
