@@ -1,0 +1,59 @@
+{
+  "files": [{
+      "src_file": "val/nspe/pal_interfaces_ns.h",
+      "dest_file": "features/frameworks/TARGET_PSA/pal_interfaces_ns.h"
+    },
+    {
+      "src_file": "val/nspe/val_attestation.c",
+      "dest_file": "features/frameworks/TARGET_PSA/val_attestation.c"
+    },
+    {
+      "src_file": "val/nspe/val_attestation.h",
+      "dest_file": "features/frameworks/TARGET_PSA/val_attestation.h"
+    },
+    {
+      "src_file": "val/common/val_client_defs.h",
+      "dest_file": "features/frameworks/TARGET_PSA/val_client_defs.h"
+    },
+    {
+      "src_file": "val/nspe/val_crypto.c",
+      "dest_file": "features/frameworks/TARGET_PSA/val_crypto.c"
+    },
+    {
+      "src_file": "val/nspe/val_crypto.h",
+      "dest_file": "features/frameworks/TARGET_PSA/val_crypto.h"
+    },
+    {
+      "src_file": "val/nspe/val_entry.h",
+      "dest_file": "features/frameworks/TARGET_PSA/val_entry.h"
+    },
+    {
+      "src_file": "val/nspe/val_interfaces.h",
+      "dest_file": "features/frameworks/TARGET_PSA/val_interfaces.h"
+    },
+    {
+      "src_file": "val/nspe/val_internal_trusted_storage.c",
+      "dest_file": "features/frameworks/TARGET_PSA/val_internal_trusted_storage.c"
+    },
+    {
+      "src_file": "val/nspe/val_internal_trusted_storage.h",
+      "dest_file": "features/frameworks/TARGET_PSA/val_internal_trusted_storage.h"
+    },
+    {
+      "src_file": "val/nspe/val_protected_storage.c",
+      "dest_file": "features/frameworks/TARGET_PSA/val_protected_storage.c"
+    },
+    {
+      "src_file": "val/nspe/val_protected_storage.h",
+      "dest_file": "features/frameworks/TARGET_PSA/val_protected_storage.h"
+    },
+    {
+      "src_file": "val/common/val.h",
+      "dest_file": "features/frameworks/TARGET_PSA/val.h"
+    }
+  ],
+  "folders": [{
+    "src_folder": "dev_apis/internal_trusted_storage/test_s001/",
+    "dest_folder": "TESTS/psa-compliance/test_s001/"
+  }],
+}

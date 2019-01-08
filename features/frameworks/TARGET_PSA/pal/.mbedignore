@@ -1,0 +1,4 @@
+pal_attestation_intf.c
+pal_attestation_intf.h
+pal_protected_storage_intf.c
+pal_protected_storage_intf.h

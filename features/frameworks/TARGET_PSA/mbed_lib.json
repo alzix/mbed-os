@@ -1,0 +1,26 @@
+{
+    "name": "psa-compliance",
+    "config": {
+        "crypto-implemented": {
+            "value": 0,
+            "macro_name": "PSA_CRYPTO_IMPLEMENTED"
+        },
+        "its-implemented": {
+            "value": 1,
+            "macro_name": "PSA_INTERNAL_TRUSTED_STORAGE_IMPLEMENTED"
+        },
+        "ps-implemented": {
+            "value": 0,
+            "macro_name": "PSA_PROTECTED_STORAGE_IMPLEMENTED"
+        },
+        "attestation-implemented": {
+            "value": 0,
+            "macro_name": "PSA_INITIAL_ATTESTATION_IMPLEMENTED"
+        }
+    },
+    "macros": [
+        "PSA_IPC_IMPLEMENTED=1",
+        "VAL_NSPE_BUILD=1",
+        "NONSECURE_TEST_BUILD"
+    ]
+}
