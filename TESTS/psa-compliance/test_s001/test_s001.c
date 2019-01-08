@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 **/
-
+#define ITS_TEST
 #include "val_interfaces.h"
 #include "val_target.h"
 #include "test_s001.h"
