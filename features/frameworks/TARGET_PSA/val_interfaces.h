@@ -79,7 +79,5 @@ typedef struct {
     test_fptr_t   entry_addr;
 } val_test_info_t;
 
-#include "test_entry_fn_declare_list.inc"
-
 void test_entry(val_api_t *val, psa_api_t *psa);
 #endif

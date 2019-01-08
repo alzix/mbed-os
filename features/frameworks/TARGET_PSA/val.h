@@ -90,8 +90,7 @@ typedef uint32_t            cfg_id_t;
 
 
 /* Test Defines */
-#define TEST_PUBLISH(test_id, entry) \
-   const val_test_info_t __attribute__((section(".acs_test_info"))) CONCAT(acs_test_info, entry) = {test_id, entry}
+#define TEST_PUBLISH(test_id, entry)
 
 #define VAL_MAX_TEST_PER_COMP                200
 #define VAL_FF_BASE                            0
