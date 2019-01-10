@@ -56,4 +56,8 @@
     "src_folder": "dev_apis/internal_trusted_storage/test_s001/",
     "dest_folder": "TESTS/psa-compliance/test_s001/"
   }],
+  "commit_sha": [
+    "a266b47780aa09bab50b6888c25ee2938800c5a2",
+    "6f60a1f55236b858b2e2cddba1b0f817b3a27b36"
+  ]
 }
