@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include <time.h>
 #include "platform/platform.h"
 #include "platform/FilePath.h"
@@ -904,6 +905,9 @@ extern "C" long PREFIX(_flen)(FILEHANDLE fh)
     return size;
 }
 
+// Do not compile this code for TFM secure target
+#if !defined(COMPONENT_SPE) || !defined(TARGET_TFM)
+
 extern "C" char Image$$RW_IRAM1$$ZI$$Limit[];
 
 extern "C" MBED_WEAK __value_in_regs struct __initial_stackheap _mbed_user_setup_stackheap(uint32_t R0, uint32_t R1, uint32_t R2, uint32_t R3)
@@ -923,6 +927,8 @@ extern "C" __value_in_regs struct __initial_stackheap __user_setup_stackheap(uin
 {
     return _mbed_user_setup_stackheap(R0, R1, R2, R3);
 }
+
+#endif // !defined(COMPONENT_SPE) || !defined(TARGET_TFM)
 
 #endif
 
