@@ -2066,6 +2066,7 @@
         "device_has_add": [
             "USTICKER",
             "RTC",
+            "ANALOGIN",
             "I2C",
             "I2CSLAVE",
             "INTERRUPTIN",
