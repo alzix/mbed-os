@@ -16,7 +16,6 @@
  */
 
 #include <cstring>
-#include "KVMap.h"
 #include "KVStore.h"
 #include "TDBStore.h"
 #include "psa/internal_trusted_storage.h"
@@ -24,8 +23,6 @@
 #include "pits_version_impl.h"
 #include "mbed_error.h"
 #include "mbed_toolchain.h"
-
-using namespace mbed;
 
 #ifdef   __cplusplus
 extern "C"
@@ -52,8 +49,8 @@ static KVStore *kvstore = NULL;
 
 static void its_init(void)
 {
-    KVMap &kv_map = KVMap::get_instance();
-    kvstore = kv_map.get_internal_kv_instance(STR_EXPAND(MBED_CONF_STORAGE_DEFAULT_KV));
+
+    kvstore = get_its_kvstore_instance();
     if (!kvstore) {
         // Can only happen due to system misconfiguration.
         // Thus considered as unrecoverable error for runtime.
@@ -103,12 +100,6 @@ static void its_init(void)
             error("Could not write PSA ITS version");
         }
     }
-}
-
-// used from test only
-void its_deinit(void)
-{
-    kvstore = NULL;
 }
 
 MBED_WEAK psa_its_status_t its_version_migrate(void *storage, const its_version_t *version)
