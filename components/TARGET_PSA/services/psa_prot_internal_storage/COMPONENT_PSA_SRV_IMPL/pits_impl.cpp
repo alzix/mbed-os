@@ -16,13 +16,19 @@
  */
 
 #include <cstring>
-#include "KVMap.h"
 #include "KVStore.h"
 #include "TDBStore.h"
 #include "psa_prot_internal_storage.h"
 #include "pits_impl.h"
 #include "mbed_error.h"
 #include "mbed_toolchain.h"
+
+#if defined(TARGET_TFM) && defined(COMPONENT_SPE)
+#include "FlashIAP.h"
+#include "FlashIAPBlockDevice.h"
+#else
+#include "KVMap.h"
+#endif
 
 #ifdef   __cplusplus
 extern "C"
@@ -49,11 +55,137 @@ const uint8_t base64_coding_table[] = {
     '4', '5', '6', '7', '8', '9', '+', '-'
 };
 
+#if defined(TARGET_TFM) && defined(COMPONENT_SPE)
+
+static KVStore *internal_store = NULL;
+static bool is_pits_initialized = false;
+
+static inline uint32_t align_up(uint64_t val, uint64_t size)
+{
+    return (((val - 1) / size) + 1) * size;
+}
+
+static inline uint32_t align_down(uint64_t val, uint64_t size)
+{
+    return (((val) / size)) * size;
+}
+
+static BlockDevice *_get_blockdevice(bd_addr_t start_address, bd_size_t size)
+{
+    int ret = MBED_SUCCESS;
+    bd_addr_t flash_end_address;
+    bd_addr_t flash_start_address;
+    bd_addr_t aligned_start_address;
+    bd_addr_t aligned_end_address;
+    bd_addr_t end_address;
+    FlashIAP flash;
+
+    ret = flash.init();
+    if (ret != 0) {
+        return NULL;
+    }
+
+    //Get flash parameters before starting
+    flash_start_address = flash.get_flash_start();
+    flash_end_address = flash_start_address + flash.get_flash_size();;
+
+    aligned_start_address = align_down(start_address, flash.get_sector_size(start_address));
+    if (start_address != aligned_start_address) {
+        flash.deinit();
+        return NULL;
+    }
+
+    end_address = start_address + size;
+    if (end_address > flash_end_address) {
+        flash.deinit();
+        return NULL;
+    }
+
+    aligned_end_address = align_up(end_address, flash.get_sector_size(end_address - 1));
+    if (end_address != aligned_end_address) {
+        flash.deinit();
+        return NULL;
+    }
+
+    static FlashIAPBlockDevice bd(start_address, size);
+    flash.deinit();
+    return &bd;
+}
+
+static int _calculate_blocksize_match_tdbstore(BlockDevice *bd)
+{
+    bd_size_t size = bd->size();
+    bd_size_t erase_size = bd->get_erase_size();
+    bd_size_t number_of_sector = size / erase_size;
+
+    if (number_of_sector < 2) {
+        return -1;
+    }
+
+    return 0;
+}
+
+static int pits_init(void)
+{
+    int ret = MBED_SUCCESS;
+    bd_size_t internal_size = MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_SIZE;
+    bd_addr_t internal_start_address = MBED_CONF_STORAGE_TDB_INTERNAL_INTERNAL_BASE_ADDRESS;
+
+    //Get internal memory FLASHIAP block device.
+    BlockDevice *internal_bd = _get_blockdevice(internal_start_address, internal_size);
+    if (internal_bd == NULL) {
+        return -1; // TODO: Error code
+    }
+
+    ret = internal_bd->init();
+    if (ret != 0) {
+        return ret;
+    }
+
+    //Check that internal flash has 2 or more sectors
+    if (_calculate_blocksize_match_tdbstore(internal_bd) != 0) {
+        return -1; // TODO: Error code
+    }
+
+    //Deinitialize internal block device and TDB will reinitialize and take control on it.
+    ret = internal_bd->deinit();
+    if (ret != 0) {
+        return ret;
+    }
+
+    //Create a TDBStore in the internal FLASHIAP block device.
+    static TDBStore tdb_internal(internal_bd);
+    internal_store = &tdb_internal;
+
+    ret = internal_store->init();
+
+    return ret;
+}
+
+int kv_init_storage_config()
+{
+    int ret = MBED_SUCCESS;
+
+    if (!is_pits_initialized) {
+        ret = pits_init();
+    }
+
+    is_pits_initialized = (ret == MBED_SUCCESS) ? true : false;
+    return ret;
+}
+#endif // defined(TARGET_TFM) && defined(COMPONENT_SPE)
+
 /*
  * \brief Get default KVStore instance for internal flesh storage
  *
  * \return valid pointer to KVStore
  */
+#if defined(TARGET_TFM) && defined(COMPONENT_SPE)
+KVStore *get_kvstore_instance(void)
+{
+    return internal_store;
+}
+#else
 static KVStore *get_kvstore_instance(void)
 {
     KVMap &kv_map = KVMap::get_instance();
@@ -66,6 +198,7 @@ static KVStore *get_kvstore_instance(void)
     }
     return kvstore;
 }
+#endif // defined(TARGET_TFM) && defined(COMPONENT_SPE)
 
 /*
  * \brief Convert KVStore stauts codes to PSA internal storage status codes

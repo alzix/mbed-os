@@ -20,7 +20,9 @@
 
 #include "psa_prot_internal_storage.h"
 #include "pits_impl.h"
+#if !defined(TARGET_TFM) || !defined(COMPONENT_SPE)
 #include "kv_config.h"
+#endif
 #include "mbed_error.h"
 
 // In EMUL world, there is no real partitioning, which makes the source partition irrelevant.

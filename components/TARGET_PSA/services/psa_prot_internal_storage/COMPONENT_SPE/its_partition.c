@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+#if !defined(TARGET_TFM)
+
 #include <string.h>
 #include "cmsis_os2.h"
 #include "spm_server.h"
@@ -194,3 +196,5 @@ void pits_entry(void *ptr)
 #ifdef   __cplusplus
 }
 #endif
+
+#endif // !defined(TARGET_TFM)
