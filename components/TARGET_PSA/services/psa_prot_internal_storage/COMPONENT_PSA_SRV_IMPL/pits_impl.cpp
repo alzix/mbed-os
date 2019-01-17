@@ -16,21 +16,18 @@
  */
 
 #include <cstring>
-#include "KVMap.h"
 #include "KVStore.h"
 #include "TDBStore.h"
 #include "psa/internal_trusted_storage.h"
 #include "pits_impl.h"
 #include "pits_version_impl.h"
 #include "mbed_error.h"
+#include "mbed_assert.h"
 #include "mbed_toolchain.h"
 
 using namespace mbed;
 
-#ifdef   __cplusplus
-extern "C"
-{
-#endif
+KVStore *get_its_kvstore_instance(void);
 
 // Maximum length of filename we use for kvstore API.
 // pid: 6; delimiter: 1; uid: 11; str terminator: 1
@@ -50,10 +47,16 @@ const uint8_t base64_coding_table[] = {
 
 static KVStore *kvstore = NULL;
 
+MBED_WEAK psa_its_status_t its_version_migrate(void *storage, const its_version_t *version)
+{
+    (void)storage;
+    (void)version;
+    return PSA_ITS_SUCCESS;
+}
+
 static void its_init(void)
 {
-    KVMap &kv_map = KVMap::get_instance();
-    kvstore = kv_map.get_internal_kv_instance(STR_EXPAND(MBED_CONF_STORAGE_DEFAULT_KV));
+    kvstore = get_its_kvstore_instance();
     if (!kvstore) {
         // Can only happen due to system misconfiguration.
         // Thus considered as unrecoverable error for runtime.
@@ -103,19 +106,6 @@ static void its_init(void)
             error("Could not write PSA ITS version");
         }
     }
-}
-
-// used from test only
-void its_deinit(void)
-{
-    kvstore = NULL;
-}
-
-MBED_WEAK psa_its_status_t its_version_migrate(void *storage, const its_version_t *version)
-{
-    (void)storage;
-    (void)version;
-    return PSA_ITS_SUCCESS;
 }
 
 /*
@@ -316,7 +306,3 @@ psa_its_status_t psa_its_reset_impl()
     int status = kvstore->reset();
     return convert_status(status);
 }
-
-#ifdef   __cplusplus
-}
-#endif
