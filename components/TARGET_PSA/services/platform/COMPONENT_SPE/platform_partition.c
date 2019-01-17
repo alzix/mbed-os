@@ -20,6 +20,13 @@
 #include "psa/internal_trusted_storage.h"
 #include "psa/service.h"
 
+#if defined(TARGET_TFM)
+#define SPM_PANIC(format, ...) \
+{ \
+    while(1){}; \
+}
+#endif
+
 typedef psa_status_t (*SignalHandler)(psa_msg_t *);
 
 static psa_status_t lifecycle_get(psa_msg_t *msg)
@@ -77,7 +84,12 @@ void platform_partition_entry(void *ptr)
     uint32_t signals = 0;
     psa_msg_t msg = {0};
     while (1) {
+#if defined(TARGET_MBED_SPM)
         signals = psa_wait_any(PSA_BLOCK);
+#else
+        signals = psa_wait(PLATFORM_WAIT_ANY_SID_MSK, PSA_BLOCK);
+#endif
+
         if ((signals & PSA_PLATFORM_LC_GET_MSK) != 0) {
             psa_get(PSA_PLATFORM_LC_GET_MSK, &msg);
             message_handler(&msg, lifecycle_get);

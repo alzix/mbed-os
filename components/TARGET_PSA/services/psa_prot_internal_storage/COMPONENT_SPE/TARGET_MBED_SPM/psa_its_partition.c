@@ -124,7 +124,7 @@ static const osMutexAttr_t its_mutex_attr = {
 };
 
 
-extern void pits_entry(void *ptr);
+extern void its_entry(void *ptr);
 
 void its_init(spm_partition_t *partition)
 {
@@ -142,7 +142,7 @@ void its_init(spm_partition_t *partition)
     }
     partition->rot_services = its_rot_services;
 
-    partition->thread_id = osThreadNew(pits_entry, NULL, &its_thread_attr);
+    partition->thread_id = osThreadNew(its_entry, NULL, &its_thread_attr);
     if (NULL == partition->thread_id) {
         SPM_PANIC("Failed to create start main thread of partition its!\n");
     }
