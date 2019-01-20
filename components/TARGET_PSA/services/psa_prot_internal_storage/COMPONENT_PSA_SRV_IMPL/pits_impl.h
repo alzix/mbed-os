@@ -26,7 +26,7 @@ extern "C"
 {
 #endif
 
-#if defined(TARGET_TFM)
+#if defined(TARGET_TFM) && defined(COMPONENT_SPE)
 extern int kv_init_storage_config();
 #endif
 #define PITS_DATA_PTR_AT_OFFSET(ptr, offset) ((void *)(((uintptr_t)ptr) + ((uintptr_t)offset)))

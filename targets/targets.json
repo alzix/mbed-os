@@ -5093,7 +5093,7 @@
         "release_versions": ["2", "5"]
     },
     "ARM_MUSCA_A1": {
-        "inherits": ["Target"],
+        "inherits": ["NSPE_Target"],
         "core": "Cortex-M33-NS",
         "device_has": ["INTERRUPTIN", "LPTICKER", "SERIAL", "SLEEP", "USTICKER"],
         "macros": [
@@ -5112,7 +5112,7 @@
         "release_versions": ["5"]
     },
     "ARM_MUSCA_A1_S": {
-        "inherits": ["Target"],
+        "inherits": ["SPE_Target"],
         "core": "Cortex-M33",
         "device_has": ["FLASH"],
         "macros": [
@@ -5124,8 +5124,7 @@
             "TFM_LVL=1",
             "DAUTH_CHIP_DEFAULT"
         ],
-        "components_add": ["SPE", "FLASHIAP"],
-        "components_remove": ["NSPE"],
+        "components_add": ["FLASHIAP"],
         "extra_labels": ["ARM_SSG", "MUSCA_A1", "PSA", "TFM"],
         "supported_toolchains": ["ARMC6", "GCC_ARM"],
         "forced_reset_timeout": 7,

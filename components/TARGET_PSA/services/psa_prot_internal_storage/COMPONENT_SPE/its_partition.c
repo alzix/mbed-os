@@ -15,8 +15,6 @@
  * limitations under the License.
  */
 
-#if !defined(TARGET_TFM)
-
 #include <string.h>
 #include "psa/client.h"
 #include "psa/service.h"
@@ -205,5 +203,3 @@ void pits_entry(void *ptr)
 #ifdef   __cplusplus
 }
 #endif
-
-#endif // !defined(TARGET_TFM)

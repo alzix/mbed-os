@@ -101,13 +101,29 @@ static void its_init(void)
         }
     }
 }
+<<<<<<< HEAD
 
 MBED_WEAK psa_its_status_t its_version_migrate(void *storage, const its_version_t *version)
+=======
+#endif // defined(TARGET_TFM)
+
+/*
+ * \brief Get default KVStore instance for internal flesh storage
+ *
+ * \return valid pointer to KVStore
+ */
+#if defined(TARGET_TFM)
+KVStore *get_kvstore_instance(void)
+>>>>>>> Rename TARGET_PSA/spm to TARGET_PSA/TARGET_MBED_SPM
 {
     (void)storage;
     (void)version;
     return PSA_ITS_SUCCESS;
 }
+<<<<<<< HEAD
+=======
+#endif // defined(TARGET_TFM)
+>>>>>>> Rename TARGET_PSA/spm to TARGET_PSA/TARGET_MBED_SPM
 
 /*
  * \brief Convert KVStore stauts codes to PSA internal storage status codes
