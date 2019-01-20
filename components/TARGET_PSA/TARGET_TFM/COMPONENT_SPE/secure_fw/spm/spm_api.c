@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -11,6 +11,7 @@
 #include <string.h>
 #include "spm_api.h"
 #include "platform/include/tfm_spm_hal.h"
+#include "secure_utilities.h"
 #include "spm_db_setup.h"
 #include "tfm_internal.h"
 #include "tfm_api.h"
@@ -71,7 +72,7 @@ enum spm_err_t tfm_spm_db_init(void)
 {
     struct spm_partition_desc_t *part_ptr;
 
-    memset (&g_spm_partition_db, 0, sizeof(g_spm_partition_db));
+    tfm_memset (&g_spm_partition_db, 0, sizeof(g_spm_partition_db));
 
     /* This function initialises partition db */
     g_spm_partition_db.running_partition_idx = SPM_INVALID_PARTITION_IDX;
@@ -83,8 +84,10 @@ enum spm_err_t tfm_spm_db_init(void)
 
     /* For the non secure Execution environment */
 #if TFM_LVL != 1
-    extern uint32_t Stack_Mem[];
-    extern uint32_t Stack_top[];
+    extern uint32_t Image$$ARM_LIB_STACK$$ZI$$Base[];
+    extern uint32_t Image$$ARM_LIB_STACK$$ZI$$Limit[];
+    uint32_t psp_stack_bottom = (uint32_t)Image$$ARM_LIB_STACK$$ZI$$Base;
+    uint32_t psp_stack_top    = (uint32_t)Image$$ARM_LIB_STACK$$ZI$$Limit;
 #endif
     if (g_spm_partition_db.partition_count >= SPM_MAX_PARTITIONS) {
         return SPM_ERR_INVALID_CONFIG;
@@ -95,12 +98,12 @@ enum spm_err_t tfm_spm_db_init(void)
     part_ptr->static_data.partition_flags = 0;
 
 #if TFM_LVL != 1
-    part_ptr->memory_data.stack_bottom = (uint32_t)Stack_Mem;
-    part_ptr->memory_data.stack_top = (uint32_t)Stack_top;
+    part_ptr->memory_data.stack_bottom = psp_stack_bottom;
+    part_ptr->memory_data.stack_top    = psp_stack_top;
     /* Since RW, ZI and stack are configured as one MPU region, configure
-     * RW start address to Stack_Mem to get RW access to stack
+     * RW start address to psp_stack_bottom to get RW access to stack
      */
-    part_ptr->memory_data.rw_start = (uint32_t)Stack_Mem;
+    part_ptr->memory_data.rw_start     = psp_stack_bottom;
 #endif
 
     part_ptr->runtime_data.partition_state = SPM_PARTITION_STATE_UNINIT;
@@ -115,7 +118,7 @@ enum spm_err_t tfm_spm_db_init(void)
             g_spm_partition_db.partition_count]);
     part_ptr->static_data.partition_id = TFM_SP_CORE_ID;
     part_ptr->static_data.partition_flags =
-                    SPM_PART_FLAG_SECURE | SPM_PART_FLAG_TRUSTED;
+                    SPM_PART_FLAG_APP_ROT | SPM_PART_FLAG_PSA_ROT;
     part_ptr->runtime_data.partition_state = SPM_PARTITION_STATE_UNINIT;
     ++g_spm_partition_db.partition_count;
 
@@ -138,6 +141,11 @@ enum spm_err_t tfm_spm_partition_init(void)
     /* Call the init function for each partition */
     for (idx = 0; idx < g_spm_partition_db.partition_count; ++idx) {
         part = &g_spm_partition_db.partitions[idx];
+#ifdef TFM_PSA_API
+        if (part->static_data.partition_flags & SPM_PART_FLAG_IPC) {
+            continue;
+        }
+#endif
         tfm_spm_hal_configure_default_isolation(part->platform_data);
         if (part->static_data.partition_init == NULL) {
             tfm_spm_partition_set_state(idx, SPM_PARTITION_STATE_IDLE);

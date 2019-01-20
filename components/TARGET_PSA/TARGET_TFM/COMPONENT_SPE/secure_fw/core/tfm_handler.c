@@ -16,11 +16,18 @@
 #include "region_defs.h"
 #include "tfm_api.h"
 #include "tfm_internal.h"
+#ifdef TFM_PSA_API
+#include <stdbool.h>
+#include "tfm_svcalls.h"
+#endif
 
 /* This SVC handler is called when a secure partition requests access to a
  * buffer area
  */
 extern int32_t tfm_core_set_buffer_area_handler(const uint32_t args[]);
+#ifdef TFM_PSA_API
+extern void tfm_psa_ipc_request_handler(const uint32_t svc_args[]);
+#endif
 
 struct tfm_fault_context_s {
     uint32_t R0;
@@ -62,7 +69,9 @@ void SecureFault_Handler(void)
          sp <=  S_DATA_LIMIT - sizeof(tfm_fault_context) + 1) ||
         (sp >= NS_DATA_START &&
          sp <= NS_DATA_LIMIT - sizeof(tfm_fault_context) + 1)) {
-        memcpy(&tfm_fault_context, (const void *)sp, sizeof(tfm_fault_context));
+        tfm_memcpy(&tfm_fault_context,
+                   (const void *)sp,
+                   sizeof(tfm_fault_context));
     }
 
     LOG_MSG("Oops... Secure fault!!! You're not going anywhere!");
@@ -169,9 +178,36 @@ uint32_t SVCHandler_main(uint32_t *svc_args, uint32_t lr)
     case TFM_SVC_SET_SHARE_AREA:
         tfm_core_set_buffer_area_handler(svc_args);
         break;
+#ifdef TFM_PSA_API
+    case TFM_SVC_IPC_REQUEST:
+        tfm_psa_ipc_request_handler(svc_args);
+        break;
+#endif
     case TFM_SVC_PRINT:
         printf("\e[1;34m[Sec Thread] %s\e[0m\r\n", (char *)svc_args[0]);
         break;
+    case TFM_SVC_GET_BOOT_DATA:
+        tfm_core_get_boot_data_handler(svc_args);
+        break;
+#ifdef TFM_PSA_API
+    case TFM_SVC_PSA_FRAMEWORK_VERSION:
+    case TFM_SVC_PSA_VERSION:
+    case TFM_SVC_PSA_CONNECT:
+    case TFM_SVC_PSA_CALL:
+    case TFM_SVC_PSA_CLOSE:
+    case TFM_SVC_PSA_WAIT:
+    case TFM_SVC_PSA_GET:
+    case TFM_SVC_PSA_SET_RHANDLE:
+    case TFM_SVC_PSA_READ:
+    case TFM_SVC_PSA_SKIP:
+    case TFM_SVC_PSA_WRITE:
+    case TFM_SVC_PSA_REPLY:
+    case TFM_SVC_PSA_NOTIFY:
+    case TFM_SVC_PSA_CLEAR:
+    case TFM_SVC_PSA_EOI:
+        svc_args[0] = SVC_Handler_IPC(svc_number, svc_args);
+        break;
+#endif
     default:
         LOG_MSG("Unknown SVC number requested!");
         break;
