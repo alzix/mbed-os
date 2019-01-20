@@ -32,7 +32,22 @@ LR_CODE S_CODE_START {
 
 #if TFM_LVL == 1
 
-    ER_TFM_DATA S_DATA_START S_DATA_SIZE {
+    /* Shared area between BL2 and runtime to exchange data */
+    TFM_SHARED_DATA S_DATA_START ALIGN 32 OVERLAY EMPTY BOOT_TFM_SHARED_DATA_SIZE {
+    }
+
+    /* MSP */
+    ARM_LIB_STACK_MSP S_DATA_START ALIGN 32 OVERLAY EMPTY S_MSP_STACK_SIZE {
+    }
+
+    /* PSP */
+    ARM_LIB_STACK +0 ALIGN 32 EMPTY S_PSP_STACK_SIZE {
+    }
+
+    ARM_LIB_HEAP +0 ALIGN 8 EMPTY S_HEAP_SIZE {
+    }
+
+    ER_TFM_DATA +0 {
         .ANY (+RW +ZI)
     }
 
@@ -46,7 +61,7 @@ LR_CODE S_CODE_START {
 
     /**** Unprivileged Secure code start here */
     TFM_UNPRIV_CODE +0 ALIGN 32 {
-        tfm_unpriv_api.o (+RO)
+        tfm_spm_services.o (+RO)
         platform_retarget_dev.o (+RO)
         *(SFN)
         *armlib*
@@ -57,12 +72,27 @@ LR_CODE S_CODE_START {
         *(TFM_SP_PLATFORM_ATTR_FN)
     }
 
-    ER_TFM_DATA S_DATA_START S_DATA_SIZE {
+    /* Shared area between BL2 and runtime to exchange data */
+    TFM_SHARED_DATA S_DATA_START ALIGN 32 OVERLAY EMPTY BOOT_TFM_SHARED_DATA_SIZE {
+    }
+
+    /* MSP */
+    ARM_LIB_STACK_MSP S_DATA_START ALIGN 32 OVERLAY EMPTY S_MSP_STACK_SIZE {
+    }
+
+    /* PSP */
+    ARM_LIB_STACK +0 ALIGN 32 EMPTY S_PSP_STACK_SIZE {
+    }
+
+    ARM_LIB_HEAP +0 ALIGN 8 EMPTY S_HEAP_SIZE {
+    }
+
+    ER_TFM_DATA +0 {
         .ANY (+RW +ZI)
     }
 
     TFM_UNPRIV_RO_DATA +0 ALIGN 32 {
-        tfm_unpriv_api.o (+RW +ZI)
+        tfm_spm_services.o (+RW +ZI)
         platform_retarget_dev.o (+RW +ZI)
     }
 
@@ -78,18 +108,22 @@ LR_CODE S_CODE_START {
 
 #endif /* TFM_LVL == 1 */
 
+    /* This empty, zero long execution region is here to mark the limit address
+     * of the last execution region that is allocated in SRAM.
+     */
+    SRAM_WATERMARK +0 EMPTY 0x0 {
+    }
+
     ER_CODE_CMSE_VENEER CMSE_VENEER_REGION_START FIXED PADVALUE 0xFFFFFFFF CMSE_VENEER_REGION_SIZE {
         *(Veneer$$CMSE)
     }
+
+    /* Make sure that the sections allocated in the SRAM does not exceed the
+     * size of the SRAM available.
+     */
+    ScatterAssert(ImageLimit(SRAM_WATERMARK) <= S_DATA_START + S_DATA_SIZE)
 }
 
-/*
-LR_VENEER CMSE_VENEER_REGION_START {
-    ER_CODE_CMSE_VENEER CMSE_VENEER_REGION_START CMSE_VENEER_REGION_SIZE {
-        *(Veneer$$CMSE)
-    }
-}
-*/
 
 LR_NS_PARTITION NS_PARTITION_START {
     /* Reserved place for NS application.

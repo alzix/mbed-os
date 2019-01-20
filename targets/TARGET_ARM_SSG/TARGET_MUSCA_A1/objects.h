@@ -46,6 +46,13 @@ struct flash_s {
 };
 #endif // DEVICE_FLASH
 
+#if DEVICE_TRNG
+struct trng_s {
+    /*  nothing to be stored for now */
+    void *dummy;
+};
+#endif // DEVICE_TRNG
+
 #ifdef __cplusplus
 }
 #endif

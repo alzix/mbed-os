@@ -1,5 +1,5 @@
 ;/*
-; * Copyright (c) 2018 ARM Limited
+; * Copyright (c) 2018-2019 ARM Limited
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the "License");
 ; * you may not use this file except in compliance with the License.
@@ -35,21 +35,14 @@ MEMORY
   VENEERS (rx)  : ORIGIN = CMSE_VENEER_REGION_START, LENGTH = CMSE_VENEER_REGION_SIZE
 }
 
-__heap_size__  = 0x00001000;
-__psp_stack_size__ = 0x00000800;
-__msp_stack_size__ = 0x00000800;
+__heap_size__  = S_HEAP_SIZE;
+__psp_stack_size__ = S_PSP_STACK_SIZE;
+__msp_init_stack_size__ = S_MSP_STACK_SIZE_INIT;
 
 /* Library configurations */
 GROUP(libgcc.a libc.a libm.a libnosys.a libc_nano.a)
 
 ENTRY(Reset_Handler)
-
-/*
- * The test service veneers may not be referenced in the secure binary so the
- * veneer objects are explicitly declared here as extern, so the linker includes
- * the veneers in the resulting binary.
- */
-EXTERN(tfm_secure_client_service_veneer_run_tests)
 
 SECTIONS
 {
@@ -107,10 +100,6 @@ SECTIONS
         LONG (SIZEOF(.TFM_BSS))
         LONG (ADDR(.TFM_UNPRIV_RO_BSS))
         LONG (SIZEOF(.TFM_UNPRIV_RO_BSS))
-        LONG (ADDR(.TFM_SP_CRYPTO_BSS))
-        LONG (SIZEOF(.TFM_SP_CRYPTO_BSS))
-        LONG (ADDR(.TFM_SP_CRYPTO_STACK))
-        LONG (SIZEOF(.TFM_SP_CRYPTO_STACK))
         LONG (ADDR(.TFM_SP_PLATFORM_BSS))
         LONG (SIZEOF(.TFM_SP_PLATFORM_BSS))
         LONG (ADDR(.TFM_SP_PLATFORM_STACK))
@@ -122,12 +111,10 @@ SECTIONS
 
     .TFM_UNPRIV_CODE : ALIGN(32)
     {
-        *tfm_unpriv_api.o(.text*)
-        *tfm_unpriv_api.o(.rodata*)
-        *dummy_crypto_keys.o(.text*)
-        *dummy_crypto_keys.o(.rodata*)
-        *dummy_nv_counters.o(.text*)
-        *dummy_nv_counters.o(.rodata*)
+        *libc_nano*:*(.text*)
+        *libc_nano*:*(.rodata*)
+        *tfm_spm_services.o(.text*)
+        *tfm_spm_services.o(.rodata*)
         *platform_retarget_dev.o(.text*)
         *platform_retarget_dev.o(.rodata*)
         *(SFN)
@@ -192,6 +179,28 @@ SECTIONS
         KEEP(*(.eh_frame*))
     } > FLASH
 
+    /* shared_data and msp_stack are overlapping on purpose when
+     * msp_stack is extended until the beginning of RAM, when shared_date
+     * was read out by partitions
+     */
+    .tfm_bl2_shared_data : ALIGN(32)
+    {
+        . += BOOT_TFM_SHARED_DATA_SIZE;
+    } > RAM AT> FLASH
+
+    .msp_stack : ALIGN(32)
+    {
+        . += __msp_init_stack_size__;
+    } > RAM AT> FLASH
+    Image$$ARM_LIB_STACK_MSP$$ZI$$Limit = ADDR(.msp_stack) + SIZEOF(.msp_stack);
+
+    .psp_stack : ALIGN(32)
+    {
+        . += __psp_stack_size__;
+    } > RAM AT> FLASH
+    Image$$ARM_LIB_STACK$$ZI$$Base = ADDR(.psp_stack);
+    Image$$ARM_LIB_STACK$$ZI$$Limit = ADDR(.psp_stack) + SIZEOF(.psp_stack);
+
 #if TFM_LVL == 1
 
     .TFM_SECURE_STACK : ALIGN(128)
@@ -208,12 +217,19 @@ SECTIONS
     Image$$TFM_UNPRIV_SCRATCH$$ZI$$Base = ADDR(.TFM_UNPRIV_SCRATCH);
     Image$$TFM_UNPRIV_SCRATCH$$ZI$$Limit = ADDR(.TFM_UNPRIV_SCRATCH) + SIZEOF(.TFM_UNPRIV_SCRATCH);
 
+    .heap : ALIGN(8)
+    {
+        __end__ = .;
+        PROVIDE(end = .);
+        __HeapBase = .;
+        . += __heap_size__;
+        __HeapLimit = .;
+        __heap_limit = .; /* Add for _sbrk */
+    } > RAM AT> FLASH
 #else /* TFM_LVL == 1 */
     .TFM_UNPRIV_RO_DATA :
     {
-        */tfm_unpriv_api.o(.data*)
-        */dummy_crypto_keys.o(.data*)
-        */dummy_nv_counters.o(.data*)
+        */tfm_spm_services.o(.data*)
         */platform_retarget_dev.o(.data*)
         . = ALIGN(32);
     } > RAM AT> FLASH
@@ -222,14 +238,10 @@ SECTIONS
 
     .TFM_UNPRIV_RO_BSS : ALIGN(32)
     {
-        */tfm_unpriv_api.o(.bss*)
+        */tfm_spm_services.o(.bss*)
         */platform_retarget_dev.o(.bss*)
-        */dummy_crypto_keys.o(.bss*)
-        */dummy_nv_counters.o(.bss*)
-        */tfm_unpriv_api.o(COMMON)
+        */tfm_spm_services.o(COMMON)
         */platform_retarget_dev.o(COMMON)
-        */dummy_crypto_keys.o(COMMON)
-        */dummy_nv_counters.o(COMMON)
         . = ALIGN(32);
     } > RAM AT> FLASH
     Image$$TFM_UNPRIV_RO_DATA$$ZI$$Base = ADDR(.TFM_UNPRIV_RO_BSS);
@@ -267,18 +279,6 @@ SECTIONS
     Image$$TFM_SP_PLATFORM_STACK$$ZI$$Limit = ADDR(.TFM_SP_PLATFORM_STACK) + SIZEOF(.TFM_SP_PLATFORM_STACK);
 
 #endif /* TFM_LVL == 1 */
-
-    .TFM_SP_SECURE_TEST_PARTITION_DATA : ALIGN(32)
-    {
-        __end__ = .;
-        PROVIDE(end = .);
-        __HeapBase = .;
-        . += __heap_size__;
-        __HeapLimit = .;
-        __heap_limit = .; /* Add for _sbrk */
-
-        . = ALIGN(32);
-    } > RAM AT> FLASH
 
     .TFM_DATA :
     {
@@ -322,18 +322,8 @@ SECTIONS
     Image$$TFM_DATA$$ZI$$Base = ADDR(.TFM_BSS);
     Image$$TFM_DATA$$ZI$$Limit = ADDR(.TFM_BSS) + SIZEOF(.TFM_BSS);
 
-    .psp_stack : ALIGN(128)
-    {
-        . += __psp_stack_size__;
-    } > RAM AT> FLASH
-    __initial_sp = ADDR(.psp_stack) + SIZEOF(.psp_stack);
-    Stack_Mem = ADDR(.psp_stack);
-
-    .msp_stack : ALIGN(128)
-    {
-        . += __msp_stack_size__;
-    } > RAM AT> FLASH
-    __initial_msp = ADDR(.msp_stack) + SIZEOF(.msp_stack);
+    Image$$ER_TFM_DATA$$Base = ADDR(.TFM_DATA);
+    Image$$ER_TFM_DATA$$Limit = ADDR(.TFM_DATA) + SIZEOF(.TFM_DATA) + SIZEOF(.TFM_BSS);
 
     /*
      * Place the CMSE Veneers (containing the SG instruction) after the code, in a
@@ -349,8 +339,8 @@ SECTIONS
     Image$$ER_CODE_CMSE_VENEER$$Limit = ADDR(.gnu.sgstubs) + SIZEOF(.gnu.sgstubs);
 
     Load$$LR$$LR_NS_PARTITION$$Base = NS_PARTITION_START;
+
     Load$$LR$$LR_SECONDARY_PARTITION$$Base = SECONDARY_PARTITION_START;
 
-    PROVIDE(__stack = __initial_sp);
-    PROVIDE(Stack_top = __initial_sp);
+    PROVIDE(__stack = Image$$ARM_LIB_STACK$$ZI$$Limit);
 }
