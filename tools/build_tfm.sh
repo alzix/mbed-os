@@ -23,5 +23,5 @@ mbed compile -t $TOOLCHAIN -m ARM_MUSCA_A1_S \
     --source $MBED_OS_ROOT/components/TARGET_PSA/services/psa_prot_internal_storage \
     $*
 
-cp BUILD/ARM_MUSCA_A1_S/$TOOLCHAIN/TARGET_TFM.bin targets/TARGET_ARM_SSG/TARGET_MUSCA_A1/device/COMPONENT_NSPE/tfm.bin
+cp BUILD/ARM_MUSCA_A1_S/$TOOLCHAIN/TARGET_PSA.bin targets/TARGET_ARM_SSG/TARGET_MUSCA_A1/device/COMPONENT_NSPE/tfm.bin
 cp BUILD/ARM_MUSCA_A1_S/$TOOLCHAIN/cmse_lib.o targets/TARGET_ARM_SSG/TARGET_MUSCA_A1/device/COMPONENT_NSPE/cmse_lib.o

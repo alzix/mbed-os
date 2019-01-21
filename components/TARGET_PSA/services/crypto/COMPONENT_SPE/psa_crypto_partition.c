@@ -1,7 +1,14 @@
 // ---------------------------------- Includes ---------------------------------
-#include "psa/service.h"
+
+
 #include "psa/client.h"
-#include "spm_panic.h"
+#include "psa/service.h"
+#if defined(TARGET_TFM)
+#define SPM_PANIC(format, ...) \
+{ \
+    while(1){}; \
+}
+#endif
 
 #define PSA_CRYPTO_SECURE 1
 #include "crypto_spe.h"
@@ -1340,7 +1347,12 @@ void psa_crypto_generator_operations(void)
 void crypto_main(void *ptr)
 {
     while (1) {
-        uint32_t signals = psa_wait_any(PSA_BLOCK);
+        uint32_t signals = 0;
+#if defined(TARGET_MBED_SPM)
+        signals = psa_wait_any(PSA_BLOCK);
+#else
+        signals = psa_wait(CRYPTO_SRV_WAIT_ANY_SID_MSK, PSA_BLOCK);
+#endif
         if (signals & PSA_CRYPTO_INIT) {
             psa_crypto_init_operation();
         }
