@@ -88,6 +88,15 @@ def wrapped_build_project(src_dir, build_dir, mcu, *args, **kwargs):
         sys.exit(1)
 
 
+def is_relative_to_root(dirs):
+    from os.path import commonprefix, realpath
+    if not isinstance(dirs, list):
+        dirs = [dirs]
+    dirs = [realpath(d) for d in dirs]
+    out = commonprefix(dirs + [ROOT])
+    return out == ROOT
+
+
 if __name__ == '__main__':
     # Parse Options
     parser = get_default_options_parser(add_app_config=True)
@@ -308,7 +317,8 @@ if __name__ == '__main__':
         toolchain = options.tool[0]
 
         if Target.get_target(mcu).is_PSA_secure_target:
-            options.source_dir = ROOT
+            if not is_relative_to_root(options.source_dir):
+                options.source_dir = ROOT
 
         if (options.program is None) and (not options.source_dir):
             args_error(parser, "one of -p, -n, or --source is required")
