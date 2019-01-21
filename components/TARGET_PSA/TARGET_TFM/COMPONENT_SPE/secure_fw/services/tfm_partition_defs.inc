@@ -10,8 +10,12 @@
 #ifndef __TFM_PARTITION_DEFS_INC__
 #define __TFM_PARTITION_DEFS_INC__
 
-#define TFM_SP_PLATFORM_ID (TFM_SP_BASE + 0)
+#ifdef TFM_PSA_API
+#define PSA_ITS_ID (TFM_SP_BASE + 0)
+#endif /* TFM_PSA_API */
 
-#define TFM_MAX_USER_PARTITIONS (1)
+#define TFM_SP_PLATFORM_ID (TFM_SP_BASE + 1)
+
+#define TFM_MAX_USER_PARTITIONS (2)
 
 #endif /* __TFM_PARTITION_DEFS_INC__ */

@@ -10,6 +10,10 @@
 #ifndef __TFM_SFID_LIST_INC__
 #define __TFM_SFID_LIST_INC__
 
+#ifdef TFM_PSA_API
+    /******** PSA_ITS ********/
+#endif /* TFM_PSA_API */
+
     /******** TFM_SP_PLATFORM ********/
     {platform_sp_system_reset, TFM_SP_PLATFORM_SYSTEM_RESET_SFID},
 
