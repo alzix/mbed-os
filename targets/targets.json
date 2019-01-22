@@ -5113,7 +5113,8 @@
             "CMSIS_NVIC_VIRTUAL",
             "LPTICKER_DELAY_TICKS=1",
             "MBED_MPU_CUSTOM",
-            "TFM_PSA_API"
+            "TFM_PSA_API",
+            "MBEDTLS_PSA_CRYPTO_C"
         ],
         "extra_labels_add": ["PSA", "TFM"],
         "post_binary_hook": {"function": "ArmMuscaA1Code.binary_hook"}
@@ -5130,7 +5131,12 @@
             "BYPASS_NVSTORE_CHECK",
             "TFM_LVL=1",
             "DAUTH_CHIP_DEFAULT",
-            "TFM_PSA_API"
+            "TFM_PSA_API",
+            "MBEDTLS_PSA_CRYPTO_SPM",
+            "MBEDTLS_PSA_CRYPTO_C",
+            "MBEDTLS_ENTROPY_NV_SEED",
+            "MBEDTLS_PLATFORM_NV_SEED_READ_MACRO=mbed_default_seed_read",
+            "MBEDTLS_PLATFORM_NV_SEED_WRITE_MACRO=mbed_default_seed_write"
         ],
         "components_add": ["FLASHIAP"],
         "extra_labels_add": ["PSA", "TFM"]
