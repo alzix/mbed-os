@@ -40,6 +40,8 @@ psa_its_status_t psa_its_get_info_impl(int32_t pid, psa_its_uid_t uid, struct ps
 psa_its_status_t psa_its_remove_impl(int32_t pid, psa_its_uid_t uid);
 psa_its_status_t psa_its_reset_impl();
 
+psa_its_status_t psa_its_reset_impl(void);
+
 #ifdef   __cplusplus
 }
 #endif

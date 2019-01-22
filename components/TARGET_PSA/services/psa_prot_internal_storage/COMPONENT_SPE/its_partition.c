@@ -168,6 +168,7 @@ static psa_status_t storage_reset(psa_msg_t *msg)
 }
 
 
+
 static void message_handler(psa_msg_t *msg, SignalHandler handler)
 {
     psa_status_t status = PSA_SUCCESS;
@@ -228,6 +229,7 @@ void its_entry(void *ptr)
             psa_get(PSA_ITS_RESET_MSK, &msg);
             message_handler(&msg, storage_reset);
         }
+
     }
 }
 
