@@ -226,6 +226,8 @@ SECTIONS
         __HeapLimit = .;
         __heap_limit = .; /* Add for _sbrk */
     } > RAM AT> FLASH
+    Image$$ARM_LIB_HEAP$$ZI$$Base = ADDR(.heap);
+    Image$$ARM_LIB_HEAP$$ZI$$Limit = ADDR(.heap) + SIZEOF(.heap);
 #else /* TFM_LVL == 1 */
     .TFM_UNPRIV_RO_DATA :
     {
