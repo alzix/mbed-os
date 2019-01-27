@@ -25,6 +25,8 @@
 #include "FlashIAP.h"
 #include "FlashIAPBlockDevice.h"
 
+using namespace mbed;
+
 static KVStore *internal_store = NULL;
 static bool is_tfm_kv_initialized = false;
 

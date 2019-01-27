@@ -18,8 +18,12 @@
 #define CRYPTO_SRV_ID (TFM_SP_BASE + 1)
 #endif /* TFM_PSA_API */
 
-#define TFM_SP_PLATFORM_ID (TFM_SP_BASE + 2)
+#ifdef TFM_PSA_API
+#define PLATFORM_LIFECYCLE_ID (TFM_SP_BASE + 2)
+#endif /* TFM_PSA_API */
 
-#define TFM_MAX_USER_PARTITIONS (3)
+#define TFM_SP_PLATFORM_ID (TFM_SP_BASE + 3)
+
+#define TFM_MAX_USER_PARTITIONS (4)
 
 #endif /* __TFM_PARTITION_DEFS_INC__ */
