@@ -28,16 +28,16 @@
  */
 
 /* ARM SCC */
-#if defined(COMPONENT_SPE)
+#if defined(TARGET_MUSCA_A1_S)
 #define MUSCA_A1_SCC_S
 #endif
 
-#if defined(COMPONENT_NSPE)
+#if defined(TARGET_MUSCA_A1_NS)
 #define MUSCA_A1_SCC_NS
 #define MUSCA_A1_SCC_DEV   MUSCA_A1_SCC_DEV_NS
 #endif
 
-#if defined(COMPONENT_SPE)
+#if defined(TARGET_MUSCA_A1_S)
 
 /* ARM Memory Protection Controller (MPC) SIE 200 */
 #define MPC_ISRAM0_S
@@ -63,10 +63,10 @@
 #define APB_PPCEXP2_S
 #define APB_PPCEXP3_S
 
-#endif // defined(COMPONENT_SPE)
+#endif // defined(TARGET_MUSCA_A1_S)
 
 /*ARM UART Controller PL011*/
-#if defined(COMPONENT_NSPE)
+#if defined(TARGET_MUSCA_A1_NS)
 #define UART0_PL011_NS
 #define UART0_PL011_DEV                 UART0_PL011_DEV_NS
 #define uart0_tx_irq_handler            UARTTX0_Handler
@@ -74,7 +74,7 @@
 #define uart0_rx_timeout_irq_handler    UART0_RxTimeout_IRQHandler
 #endif
 
-#if defined(COMPONENT_NSPE)
+#if defined(TARGET_MUSCA_A1_NS)
 #define UART1_PL011_NS
 #define UART1_PL011_DEV                 UART1_PL011_DEV_NS
 #define uart1_tx_irq_handler            UARTTX1_Handler
@@ -83,24 +83,24 @@
 #endif
 
 /* CMSDK Timers */
-#if defined(COMPONENT_SPE)
+#if defined(TARGET_MUSCA_A1_S)
 #define CMSDK_TIMER0_S
 #endif
 
-#if defined(COMPONENT_NSPE)
+#if defined(TARGET_MUSCA_A1_NS)
 #define CMSDK_TIMER0_NS
 #define CMSDK_TIMER0_DEV  CMSDK_TIMER0_DEV_NS
 #endif
 
-#if defined(COMPONENT_SPE)
+#if defined(TARGET_MUSCA_A1_S)
 #define CMSDK_TIMER1_S
 #endif
 
-#if defined(COMPONENT_NSPE)
+#if defined(TARGET_MUSCA_A1_NS)
 #define CMSDK_TIMER1_NS
 #endif
 
-#if defined(COMPONENT_SPE)
+#if defined(TARGET_MUSCA_A1_S)
 
 /* Cadence QSPI Flash Controller */
 #define QSPI_IP6514E_S
@@ -110,9 +110,9 @@
 #define MT25QL_S
 #define MT25QL_NS
 
-#endif // defined(COMPONENT_SPE)
+#endif // defined(TARGET_MUSCA_A1_S)
 
-#if defined(COMPONENT_NSPE)
+#if defined(TARGET_MUSCA_A1_NS)
 /* GP Timer */
 #define GP_TIMER_NS
 #define GP_TIMER_DEV           GP_TIMER_DEV_NS
@@ -142,6 +142,6 @@
 #define USEC_REPORTED_BITS               (32 - USEC_REPORTED_SHIFT)
 
 #define UART_DEFAULT_BAUD_RATE           9600U
-#endif // COMPONENT_NSPE
+#endif // TARGET_MUSCA_A1_NS
 
 #endif  /* __ARM_LTD_DEVICE_CFG_H__ */

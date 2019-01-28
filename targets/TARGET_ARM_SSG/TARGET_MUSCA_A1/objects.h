@@ -30,7 +30,7 @@
 extern "C" {
 #endif
 
-#if COMPONENT_NSPE
+#if TARGET_MUSCA_A1_NS
 struct serial_s {
     struct uart_pl011_dev_t *uart_dev;
     UARTName uart_index;                /* UART device number */
@@ -38,7 +38,7 @@ struct serial_s {
     IRQn_Type rx_irq;
     IRQn_Type rx_timeout_irq;
 };
-#endif // COMPONENT_NSPE
+#endif // TARGET_MUSCA_A1_NS
 
 #if DEVICE_FLASH
 struct flash_s {

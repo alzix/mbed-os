@@ -23,7 +23,7 @@
 #include "timer_cmsdk_drv.h"
 #include "us_ticker_api.h"
 
-#if COMPONENT_NSPE
+#if TARGET_MUSCA_A1_NS
 
 static uint64_t total_ticks = 0;
 static uint32_t previous_ticks = 0;
@@ -110,7 +110,7 @@ void usec_interval_irq_handler(void)
     us_ticker_irq_handler();
 }
 
-#else // COMPONENT_NSPE
+#else // TARGET_MUSCA_A1_NS
 
 void us_ticker_init(void)
 {
@@ -138,4 +138,4 @@ const ticker_info_t *us_ticker_get_info(void)
 {
 }
 
-#endif // COMPONENT_NSPE
+#endif // TARGET_MUSCA_A1_NS

@@ -23,7 +23,7 @@
 #include "platform_regs.h"              /* Platform registers */
 #include "platform_retarget.h"          /* Peripherals base addresses */
 
-#if defined(COMPONENT_NSPE)
+#if defined(TARGET_MUSCA_A1_NS)
 #include "cmsis_nvic.h"
 #endif
 
