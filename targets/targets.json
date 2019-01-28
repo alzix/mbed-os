@@ -5117,7 +5117,13 @@
             "MBEDTLS_PSA_CRYPTO_C"
         ],
         "extra_labels_add": ["MUSCA_A1_NS", "PSA", "TFM"],
-        "post_binary_hook": {"function": "ArmMuscaA1Code.binary_hook"}
+        "post_binary_hook": {"function": "ArmMuscaA1Code.binary_hook"},
+        "overrides": {
+            "non-secure-rom-start": "0x000a0400",
+            "non-secure-rom-size": "0x5f800",
+            "non-secure-ram-start": "0x20010170",
+            "non-secure-ram-size": "0xfe90"
+        }
     },
     "ARM_MUSCA_A1_S": {
         "inherits": ["SPE_Target", "ARM_MUSCA_A1"],
@@ -5139,7 +5145,13 @@
             "MBEDTLS_PLATFORM_NV_SEED_WRITE_MACRO=mbed_default_seed_write"
         ],
         "components_add": ["FLASHIAP"],
-        "extra_labels_add": ["MUSCA_A1_S", "PSA", "TFM"]
+        "extra_labels_add": ["MUSCA_A1_S", "PSA", "TFM"],
+        "overrides": {
+            "secure-rom-start": "0x10020400",
+            "secure-rom-size": "0x7f800",
+            "secure-ram-start": "0x30000000",
+            "secure-ram-size": "0x10000"
+        }
     },
     "RZ_A1XX": {
         "inherits": ["Target"],
