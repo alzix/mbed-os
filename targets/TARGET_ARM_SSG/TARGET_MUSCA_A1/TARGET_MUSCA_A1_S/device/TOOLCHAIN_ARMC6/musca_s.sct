@@ -22,10 +22,26 @@
   #define TFM_LVL   1
 #endif
 
-LR_CODE S_CODE_START {
+#if !defined(MBED_ROM_START)
+  #define MBED_ROM_START    S_CODE_START    // 0x10020400
+#endif
+
+#if !defined(MBED_ROM_SIZE)
+  #define MBED_ROM_SIZE     IMAGE_CODE_SIZE // 0x7f800
+#endif
+
+#if !defined(MBED_RAM_START)
+  #define MBED_RAM_START    S_DATA_START    // 0x30000000
+#endif
+
+#if !defined(MBED_RAM_SIZE)
+  #define MBED_RAM_SIZE     S_DATA_SIZE     // 0x10000
+#endif
+
+LR_CODE MBED_ROM_START MBED_ROM_SIZE {
 
     /****  This initial section contains common code for TEE */
-    ER_TFM_CODE S_CODE_START S_CODE_SIZE {
+    ER_TFM_CODE MBED_ROM_START S_CODE_SIZE {
         *.o (RESET +First)
         .ANY (+RO)
     }
@@ -33,11 +49,11 @@ LR_CODE S_CODE_START {
 #if TFM_LVL == 1
 
     /* Shared area between BL2 and runtime to exchange data */
-    TFM_SHARED_DATA S_DATA_START ALIGN 32 OVERLAY EMPTY BOOT_TFM_SHARED_DATA_SIZE {
+    TFM_SHARED_DATA MBED_RAM_START ALIGN 32 OVERLAY EMPTY BOOT_TFM_SHARED_DATA_SIZE {
     }
 
     /* MSP */
-    ARM_LIB_STACK_MSP S_DATA_START ALIGN 32 OVERLAY EMPTY S_MSP_STACK_SIZE {
+    ARM_LIB_STACK_MSP MBED_RAM_START ALIGN 32 OVERLAY EMPTY S_MSP_STACK_SIZE {
     }
 
     /* PSP */
@@ -73,11 +89,11 @@ LR_CODE S_CODE_START {
     }
 
     /* Shared area between BL2 and runtime to exchange data */
-    TFM_SHARED_DATA S_DATA_START ALIGN 32 OVERLAY EMPTY BOOT_TFM_SHARED_DATA_SIZE {
+    TFM_SHARED_DATA MBED_RAM_START ALIGN 32 OVERLAY EMPTY BOOT_TFM_SHARED_DATA_SIZE {
     }
 
     /* MSP */
-    ARM_LIB_STACK_MSP S_DATA_START ALIGN 32 OVERLAY EMPTY S_MSP_STACK_SIZE {
+    ARM_LIB_STACK_MSP MBED_RAM_START ALIGN 32 OVERLAY EMPTY S_MSP_STACK_SIZE {
     }
 
     /* PSP */
@@ -121,7 +137,7 @@ LR_CODE S_CODE_START {
     /* Make sure that the sections allocated in the SRAM does not exceed the
      * size of the SRAM available.
      */
-    ScatterAssert(ImageLimit(SRAM_WATERMARK) <= S_DATA_START + S_DATA_SIZE)
+    ScatterAssert(ImageLimit(SRAM_WATERMARK) <= MBED_RAM_START + MBED_RAM_SIZE)
 }
 
 

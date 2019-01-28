@@ -19,13 +19,29 @@
 #include "../../../partition/region_defs.h"
 #include "../cmsis_nvic.h"
 
-LR_CODE NS_CODE_START NS_CODE_SIZE {
-    ER_CODE NS_CODE_START {
+#if !defined(MBED_ROM_START)
+  #define MBED_ROM_START    NS_CODE_START                           // 0x000a0400
+#endif
+
+#if !defined(MBED_ROM_SIZE)
+  #define MBED_ROM_SIZE     NS_CODE_SIZE                            // 0x5f800
+#endif
+
+#if !defined(MBED_RAM_START)
+  #define MBED_RAM_START    NVIC_RAM_VECTOR_LIMIT                   // 0x20010170
+#endif
+
+#if !defined(MBED_RAM_SIZE)
+  #define MBED_RAM_SIZE     (NS_DATA_SIZE - NVIC_RAM_VECTOR_SIZE)   // 0xfe90
+#endif
+
+LR_CODE MBED_ROM_START NS_CODE_SIZE {
+    ER_CODE MBED_ROM_START NS_CODE_SIZE {
         *.o (VECTOR +First)
         .ANY (+RO)
     }
 
-    RW_IRAM1 NVIC_RAM_VECTOR_LIMIT (NS_DATA_SIZE - NVIC_RAM_VECTOR_SIZE) {
+    RW_IRAM1 MBED_RAM_START MBED_RAM_SIZE {
         * (+RW) ; RW data that gets copied from Flash to SRAM
         * (+ZI) ; ZI data that gets initialised to zero in SRAM
     }
