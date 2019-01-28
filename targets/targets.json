@@ -5092,29 +5092,37 @@
         "features": ["BLE"],
         "release_versions": ["2", "5"]
     },
-    "ARM_MUSCA_A1": {
+
+    "ARM_MUSCA_A1_base": {
+        "public": false,
         "inherits": ["Target"],
+        "supported_toolchains": ["ARMC6", "GCC_ARM"],
+        "default_toolchain": "ARMC6",
+        "extra_labels": ["ARM_SSG", "MUSCA_A1"],
+        "forced_reset_timeout": 7,
+        "release_versions": ["5"]
+    },
+    "ARM_MUSCA_A1": {
+        "inherits": ["NSPE_Target", "ARM_MUSCA_A1_base"],
         "core": "Cortex-M33-NS",
-        "device_has": ["INTERRUPTIN", "LPTICKER", "SERIAL", "SLEEP", "USTICKER"],
+        "device_has_add": ["INTERRUPTIN", "LPTICKER", "SERIAL", "SLEEP", "USTICKER"],
         "macros": [
             "MBED_TZ_DEFAULT_ACCESS=1",
             "__STARTUP_CLEAR_BSS",
             "MBED_FAULT_HANDLER_DISABLED",
             "CMSIS_NVIC_VIRTUAL",
             "LPTICKER_DELAY_TICKS=1",
-            "MBED_MPU_CUSTOM"
+            "MBED_MPU_CUSTOM",
+            "TFM_PSA_API",
+            "MBEDTLS_PSA_CRYPTO_C"
         ],
-        "extra_labels": ["ARM_SSG", "MUSCA_A1", "PSA", "TFM"],
-        "supported_toolchains": ["ARMC6", "GCC_ARM"],
-        "default_toolchain": "ARMC6",
-        "post_binary_hook": {"function": "ArmMuscaA1Code.binary_hook"},
-        "forced_reset_timeout": 7,
-        "release_versions": ["5"]
+        "extra_labels_add": ["PSA", "TFM"],
+        "post_binary_hook": {"function": "ArmMuscaA1Code.binary_hook"}
     },
     "ARM_MUSCA_A1_S": {
-        "inherits": ["Target"],
+        "inherits": ["SPE_Target", "ARM_MUSCA_A1_base"],
         "core": "Cortex-M33",
-        "device_has": ["FLASH"],
+        "device_has_add": ["FLASH"],
         "macros": [
             "__STARTUP_CLEAR_BSS_MULTIPLE",
             "__STARTUP_COPY_MULTIPLE",
@@ -5122,14 +5130,16 @@
             "MBED_MPU_CUSTOM",
             "BYPASS_NVSTORE_CHECK",
             "TFM_LVL=1",
-            "DAUTH_CHIP_DEFAULT"
+            "DAUTH_CHIP_DEFAULT",
+            "TFM_PSA_API",
+            "MBEDTLS_PSA_CRYPTO_SPM",
+            "MBEDTLS_PSA_CRYPTO_C",
+            "MBEDTLS_ENTROPY_NV_SEED",
+            "MBEDTLS_PLATFORM_NV_SEED_READ_MACRO=mbed_default_seed_read",
+            "MBEDTLS_PLATFORM_NV_SEED_WRITE_MACRO=mbed_default_seed_write"
         ],
-        "components_add": ["SPE", "FLASHIAP"],
-        "components_remove": ["NSPE"],
-        "extra_labels": ["ARM_SSG", "MUSCA_A1", "PSA", "TFM"],
-        "supported_toolchains": ["ARMC6", "GCC_ARM"],
-        "forced_reset_timeout": 7,
-        "release_versions": ["5"]
+        "components_add": ["FLASHIAP"],
+        "extra_labels_add": ["PSA", "TFM"]
     },
     "RZ_A1XX": {
         "inherits": ["Target"],
