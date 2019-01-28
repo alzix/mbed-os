@@ -22,7 +22,7 @@
 #include "objects.h"
 #include "musca_a1_scc_drv.h"
 
-#if COMPONENT_NSPE
+#if TARGET_MUSCA_A1_NS
 
 const PinMap PinMap_UART_TX[] = {
     {UART0_TX, UART_0, ALTERNATE_FUNC_1},
@@ -108,7 +108,7 @@ void pin_mode(PinName pin, PinMode mode)
 
 }
 
-#else // COMPONENT_NSPE
+#else // TARGET_MUSCA_A1_NS
 
 void pin_function(PinName pin, int function)
 {

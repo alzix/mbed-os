@@ -48,8 +48,8 @@ def musca_tfm_bin(t_self, mbed_ns_binary_file):
     build_dir = dirname(mbed_ns_binary_file)
     mbed_os_dir = dirname(dirname(dirname(run_dir)))
     musca_dir = join(mbed_os_dir, musca_rel_path)
-    mcuboot_binary_file_name = join(musca_dir, "device", "COMPONENT_NSPE", mcuboot_binary_file_name)
-    tfm_binary_file = join(musca_dir, "device", "COMPONENT_NSPE", tfm_binary_file_name)
+    mcuboot_binary_file_name = join(musca_dir, "TARGET_MUSCA_A1_NS", "device", mcuboot_binary_file_name)
+    tfm_binary_file = join(musca_dir, "TARGET_MUSCA_A1_NS", "device", tfm_binary_file_name)
     flash_layout_file = join(musca_dir, "partition", flash_layout_file_name)
 
     concatenated_binary_file = join(build_dir, concatenated_binary_file_name)

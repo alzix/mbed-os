@@ -5122,7 +5122,7 @@
         "release_versions": ["2", "5"]
     },
 
-    "ARM_MUSCA_A1_base": {
+    "ARM_MUSCA_A1": {
         "public": false,
         "inherits": ["Target"],
         "supported_toolchains": ["ARMC6", "GCC_ARM"],
@@ -5131,8 +5131,8 @@
         "forced_reset_timeout": 7,
         "release_versions": ["5"]
     },
-    "ARM_MUSCA_A1": {
-        "inherits": ["NSPE_Target", "ARM_MUSCA_A1_base"],
+    "ARM_MUSCA_A1_NS": {
+        "inherits": ["NSPE_Target", "ARM_MUSCA_A1"],
         "core": "Cortex-M33-NS",
         "device_has_add": ["INTERRUPTIN", "LPTICKER", "SERIAL", "SLEEP", "USTICKER"],
         "macros": [
@@ -5145,11 +5145,11 @@
             "TFM_PSA_API",
             "MBEDTLS_PSA_CRYPTO_C"
         ],
-        "extra_labels_add": ["PSA", "TFM"],
+        "extra_labels_add": ["MUSCA_A1_NS", "PSA", "TFM"],
         "post_binary_hook": {"function": "ArmMuscaA1Code.binary_hook"}
     },
     "ARM_MUSCA_A1_S": {
-        "inherits": ["SPE_Target", "ARM_MUSCA_A1_base"],
+        "inherits": ["SPE_Target", "ARM_MUSCA_A1"],
         "core": "Cortex-M33",
         "device_has_add": ["FLASH"],
         "macros": [
@@ -5168,7 +5168,7 @@
             "MBEDTLS_PLATFORM_NV_SEED_WRITE_MACRO=mbed_default_seed_write"
         ],
         "components_add": ["FLASHIAP"],
-        "extra_labels_add": ["PSA", "TFM"]
+        "extra_labels_add": ["MUSCA_A1_S", "PSA", "TFM"]
     },
     "RZ_A1XX": {
         "inherits": ["Target"],
