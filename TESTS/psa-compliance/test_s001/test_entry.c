@@ -15,13 +15,12 @@
  * limitations under the License.
 **/
 
-#define ITS_TEST
 #include "val_interfaces.h"
 #include "val_target.h"
 #include "test_s001.h"
 
 #define TEST_NUM  VAL_CREATE_TEST_ID(VAL_STORAGE_BASE, 1)
-#define TEST_DESC "Key not found error testing\n"
+#define TEST_DESC "Key not found error check\n"
 
 TEST_PUBLISH(TEST_NUM, test_entry);
 val_api_t *val = NULL;

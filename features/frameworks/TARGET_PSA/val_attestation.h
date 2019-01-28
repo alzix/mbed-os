@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2018, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2019, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,11 +19,6 @@
 #define _VAL_INITIAL_ATTESTATION_H_
 
 #include "val.h"
-#include <stdarg.h>
-
-#if PSA_INITIAL_ATTESTATION_IMPLEMENTED
-#include "psa/initial_attestation.h"
-#endif
 
 #define TOO_SMALL_TOKEN_BUFFER          16
 #define CHALLENGE_SIZE                  16
@@ -34,5 +29,4 @@ enum attestation_function_code {
 };
 
 int32_t val_attestation_function(int type, ...);
-
 #endif /* _VAL_INITIAL_ATTESTATION_H_ */

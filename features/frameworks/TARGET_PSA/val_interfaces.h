@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2018, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -78,6 +78,8 @@ typedef struct {
     test_id_t     test_id;
     test_fptr_t   entry_addr;
 } val_test_info_t;
+
+#include "test_entry_fn_declare_list.inc"
 
 void test_entry(val_api_t *val, psa_api_t *psa);
 #endif

@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2018, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2019, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,14 +19,8 @@
 #define _VAL_PROTECTED_STORAGE_H_
 
 #include "val.h"
-#include <stdarg.h>
 
-#if PSA_PROTECTED_STORAGE_IMPLEMENTED
-#include "psa/protected_storage.h"
-#endif
-
-#define UID_BASE_VALUE  0
-#define UID_MAX_VALUE  15
+#define UID_BASE_VALUE 0
 #define BYTES_TO_BITS(byte)             (byte * 8)
 
 enum ps_function_code {
@@ -34,6 +28,9 @@ enum ps_function_code {
     VAL_PS_GET                          = 0x2,
     VAL_PS_GET_INFO                     = 0x3,
     VAL_PS_REMOVE                       = 0x4,
+    VAL_PS_CREATE                       = 0x5,
+    VAL_PS_SET_EXTENDED                 = 0x6,
+    VAL_PS_GET_SUPPORT                  = 0x7,
 };
 
 uint32_t val_ps_function(int type, ...);

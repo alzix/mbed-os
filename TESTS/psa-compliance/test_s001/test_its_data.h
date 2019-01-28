@@ -20,7 +20,7 @@
 #include "val_internal_trusted_storage.h"
 
 #define SST_FUNCTION val->its_function
-#define TEST_BUFF_SIZE 16
+#define psa_sst_uid_t psa_its_uid_t
 
 typedef struct {
     char                    test_desc[100];
@@ -29,9 +29,6 @@ typedef struct {
 } test_data;
 
 static struct psa_its_info_t info;
-static uint8_t write_buff[TEST_BUFF_SIZE] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
-                                             0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
-static uint8_t read_buff[TEST_BUFF_SIZE]  = {0};
 static test_data s001_data[] = {
 {
  "This is dummy for index0", 0, 0

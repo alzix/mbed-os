@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2018, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2018-2019, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,15 +19,6 @@
 #define _VAL_CRYPTO_H_
 
 #include "val.h"
-#include <stdarg.h>
-
-#if PSA_IPC_IMPLEMENTED
-#include "psa/client.h"
-#endif
-
-#if PSA_CRYPTO_IMPLEMENTED
-#include "psa/crypto.h"
-#endif
 
 #define BYTES_TO_BITS(byte)             (byte * 8)
 
@@ -47,6 +38,7 @@
 #define SIZE_512B                       512
 #define BUFFER_SIZE                     1200
 #define HASH_64B                        64
+#define BUFFER_SIZE_HIGH                5130
 
 /* Key Slot */
 #define INVALID_KEY_SLOT                0xDEAD

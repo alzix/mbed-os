@@ -1,0 +1,54 @@
+/** @file
+ * Copyright (c) 2019, Arm Limited or its affiliates. All rights reserved.
+ * SPDX-License-Identifier : Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+**/
+
+#include "val_interfaces.h"
+#include "val_target.h"
+#include "test_a001.h"
+#include "test_data.h"
+
+client_test_t test_a001_attestation_list[] = {
+    NULL,
+    psa_initial_attestation_test,
+    NULL,
+};
+
+static int         g_test_count = 1;
+
+int32_t psa_initial_attestation_test(security_t caller)
+{
+    int         num_checks = sizeof(check1)/sizeof(check1[0]);
+    uint32_t    i, status;
+    uint8_t     challenge[MAX_CHALLENGE_SIZE+1];
+    uint8_t     token_buffer[PSA_INITIAL_ATTEST_TOKEN_SIZE];
+
+    for (i = 0; i < num_checks; i++)
+    {
+        val->print(PRINT_TEST, "[Check %d] ", g_test_count++);
+        val->print(PRINT_TEST, check1[i].test_desc, 0);
+
+        memset(challenge, 0x2a, sizeof(challenge));
+
+        status = val->attestation_function(VAL_INITIAL_ATTEST_GET_TOKEN, challenge,
+                     check1[i].challenge_size, token_buffer, &check1[i].token_size);
+        TEST_ASSERT_EQUAL(status, check1[i].expected_status, TEST_CHECKPOINT_NUM(1));
+
+        if (check1[i].expected_status != PSA_SUCCESS)
+            continue;
+
+    }
+    return VAL_STATUS_SUCCESS;
+}

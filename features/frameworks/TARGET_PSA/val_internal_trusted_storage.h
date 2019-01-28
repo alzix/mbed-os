@@ -1,5 +1,5 @@
 /** @file
- * Copyright (c) 2018, Arm Limited or its affiliates. All rights reserved.
+ * Copyright (c) 2019, Arm Limited or its affiliates. All rights reserved.
  * SPDX-License-Identifier : Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,14 +19,8 @@
 #define _VAL_INTERNAL_TRUSTED_STORAGE_H_
 
 #include "val.h"
-#include <stdarg.h>
-
-#if PSA_INTERNAL_TRUSTED_STORAGE_IMPLEMENTED
-#include "psa/internal_trusted_storage.h"
-#endif
 
 #define UID_BASE_VALUE  0
-#define UID_MAX_VALUE  15
 #define BYTES_TO_BITS(byte)             (byte * 8)
 
 enum its_function_code {
