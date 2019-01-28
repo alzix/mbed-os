@@ -19,6 +19,14 @@
       "dest_folder" : "components/TARGET_PSA/TARGET_TFM/COMPONENT_SPE/secure_fw/core"
     },
     {
+      "src_folder" : "secure_fw/core/ipc",
+      "dest_folder" : "components/TARGET_PSA/TARGET_TFM/COMPONENT_SPE/secure_fw/core/ipc"
+    },
+    {
+      "src_folder" : "secure_fw/core/ipc/include",
+      "dest_folder" : "components/TARGET_PSA/TARGET_TFM/COMPONENT_SPE/secure_fw/core/ipc/include"
+    },
+    {
       "src_folder" : "secure_fw/include",
       "dest_folder" : "components/TARGET_PSA/TARGET_TFM/COMPONENT_SPE/secure_fw/include"
     },
@@ -41,6 +49,10 @@
     {
       "src_folder" : "platform/include",
       "dest_folder" : "components/TARGET_PSA/TARGET_TFM/COMPONENT_SPE/platform/include"
+    },
+    {
+      "src_folder" : "bl2/include",
+      "dest_folder" : "components/TARGET_PSA/TARGET_TFM/COMPONENT_SPE/bl2/include"
     }
   ],
    "commit_sha" : [
