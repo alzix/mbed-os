@@ -1211,7 +1211,7 @@ extern "C" WEAK void __cxa_pure_virtual(void)
 // SP.  This make it compatible with RTX RTOS thread stacks.
 #if defined(TOOLCHAIN_GCC_ARM) || defined(TOOLCHAIN_GCC_CR)
 
-#if defined(TARGET_CORTEX_A)
+#if defined(TARGET_CORTEX_A) || (defined(TARGET_TFM) && defined(COMPONENT_SPE))
 extern "C" uint32_t  __HeapLimit;
 #endif
 
@@ -1240,7 +1240,7 @@ extern "C" WEAK caddr_t _sbrk(int incr)
     unsigned char        *prev_heap = heap;
     unsigned char        *new_heap = heap + incr;
 
-#if defined(TARGET_CORTEX_A)
+#if defined(TARGET_CORTEX_A) || (defined(TARGET_TFM) && defined(COMPONENT_SPE))
     if (new_heap >= (unsigned char *)&__HeapLimit) {    /* __HeapLimit is end of heap section */
 #else
     if (new_heap >= (unsigned char *)__get_MSP()) {
