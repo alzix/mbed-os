@@ -35,9 +35,10 @@ MEMORY
   VENEERS (rx)  : ORIGIN = CMSE_VENEER_REGION_START, LENGTH = CMSE_VENEER_REGION_SIZE
 }
 
+HEAP_SIZE = S_HEAP_SIZE;
 __heap_size__  = S_HEAP_SIZE;
 __psp_stack_size__ = S_PSP_STACK_SIZE;
-__msp_init_stack_size__ = S_MSP_STACK_SIZE_INIT;
+__msp_init_stack_size__ = S_MSP_STACK_SIZE;
 
 /* Library configurations */
 GROUP(libgcc.a libc.a libm.a libnosys.a libc_nano.a)
@@ -179,55 +180,65 @@ SECTIONS
         KEEP(*(.eh_frame*))
     } > FLASH
 
-    /* shared_data and msp_stack are overlapping on purpose when
-     * msp_stack is extended until the beginning of RAM, when shared_date
-     * was read out by partitions
-     */
-    .tfm_bl2_shared_data : ALIGN(32)
+    OVERLAY S_DATA_START :
     {
-        . += BOOT_TFM_SHARED_DATA_SIZE;
-    } > RAM AT> FLASH
+        /* shared_data and msp_stack are overlapping on purpose when
+        * msp_stack is extended until the beginning of RAM, when shared_date
+        * was read out by partitions
+        */
+        .tfm_bl2_shared_data
+        {
+            . = ALIGN(32);
+            . += BOOT_TFM_SHARED_DATA_SIZE;
+        }
 
-    .msp_stack : ALIGN(32)
-    {
-        . += __msp_init_stack_size__;
-    } > RAM AT> FLASH
+        .msp_stack
+        {
+            . =  ALIGN(32);
+            . += S_MSP_STACK_SIZE;
+        }
+    } > RAM
+
     Image$$ARM_LIB_STACK_MSP$$ZI$$Limit = ADDR(.msp_stack) + SIZEOF(.msp_stack);
 
-    .psp_stack : ALIGN(32)
+    .psp_stack :
     {
-        . += __psp_stack_size__;
-    } > RAM AT> FLASH
+        . =  ALIGN(32);
+        . += S_PSP_STACK_SIZE;
+    } > RAM
     Image$$ARM_LIB_STACK$$ZI$$Base = ADDR(.psp_stack);
     Image$$ARM_LIB_STACK$$ZI$$Limit = ADDR(.psp_stack) + SIZEOF(.psp_stack);
 
 #if TFM_LVL == 1
 
-    .TFM_SECURE_STACK : ALIGN(128)
+    .heap :
     {
-        . += 0x2000;
-    } > RAM AT> FLASH
-    Image$$TFM_SECURE_STACK$$ZI$$Base = ADDR(.TFM_SECURE_STACK);
-    Image$$TFM_SECURE_STACK$$ZI$$Limit = ADDR(.TFM_SECURE_STACK) + SIZEOF(.TFM_SECURE_STACK);
-
-    .TFM_UNPRIV_SCRATCH : ALIGN(32)
-    {
-        . += 0x400;
-    } > RAM AT> FLASH
-    Image$$TFM_UNPRIV_SCRATCH$$ZI$$Base = ADDR(.TFM_UNPRIV_SCRATCH);
-    Image$$TFM_UNPRIV_SCRATCH$$ZI$$Limit = ADDR(.TFM_UNPRIV_SCRATCH) + SIZEOF(.TFM_UNPRIV_SCRATCH);
-
-    .heap : ALIGN(8)
-    {
+        . = ALIGN(8);
         __end__ = .;
         PROVIDE(end = .);
         __HeapBase = .;
-        . += __heap_size__;
+        . += S_HEAP_SIZE;
         __HeapLimit = .;
         __heap_limit = .; /* Add for _sbrk */
-    } > RAM AT> FLASH
+    } > RAM
     Image$$ARM_LIB_HEAP$$ZI$$Base = ADDR(.heap);
     Image$$ARM_LIB_HEAP$$ZI$$Limit = ADDR(.heap) + SIZEOF(.heap);
+
+    .TFM_SECURE_STACK :
+    {
+        . = ALIGN(128);
+        . += 0x1000;
+    } > RAM
+    Image$$TFM_SECURE_STACK$$ZI$$Base = ADDR(.TFM_SECURE_STACK);
+    Image$$TFM_SECURE_STACK$$ZI$$Limit = ADDR(.TFM_SECURE_STACK) + SIZEOF(.TFM_SECURE_STACK);
+
+    .TFM_UNPRIV_SCRATCH :
+    {
+        . = ALIGN(32);
+        . += 0x400;
+    } > RAM
+    Image$$TFM_UNPRIV_SCRATCH$$ZI$$Base = ADDR(.TFM_UNPRIV_SCRATCH);
+    Image$$TFM_UNPRIV_SCRATCH$$ZI$$Limit = ADDR(.TFM_UNPRIV_SCRATCH) + SIZEOF(.TFM_UNPRIV_SCRATCH);
 #else /* TFM_LVL == 1 */
     .TFM_UNPRIV_RO_DATA :
     {
@@ -313,14 +324,15 @@ SECTIONS
     Image$$TFM_DATA$$RW$$Base = ADDR(.TFM_DATA);
     Image$$TFM_DATA$$RW$$Limit = ADDR(.TFM_DATA) + SIZEOF(.TFM_DATA);
 
-    .TFM_BSS : ALIGN(4)
+    .TFM_BSS :
     {
+        . = ALIGN(4);
         __bss_start__ = .;
         *(.bss*)
         *(COMMON)
         . = ALIGN(4);
         __bss_end__ = .;
-    } > RAM AT> FLASH
+    } > RAM
     Image$$TFM_DATA$$ZI$$Base = ADDR(.TFM_BSS);
     Image$$TFM_DATA$$ZI$$Limit = ADDR(.TFM_BSS) + SIZEOF(.TFM_BSS);
 
