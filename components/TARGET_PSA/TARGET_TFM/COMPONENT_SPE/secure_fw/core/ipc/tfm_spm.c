@@ -107,6 +107,8 @@ int32_t tfm_spm_free_service_handle(struct tfm_spm_service_t *service,
     /* Remove node from handle list */
     tfm_list_del_node(&node->list);
 
+    node->rhandle = NULL;
+
     /* Back handle buffer to pool */
     tfm_pool_free(node);
     return IPC_SUCCESS;
@@ -445,15 +447,19 @@ tfm_spm_partition_get_thread_info_ext(uint32_t partition_idx)
     return &g_spm_partition_db.partitions[partition_idx].sp_thrd;
 }
 
-static uint32_t tfm_spm_partition_get_stack_base_ext(uint32_t partition_idx)
+static uint32_t tfm_spm_partition_get_stack_size_ext(uint32_t partition_idx)
 {
-    return (uint32_t)&(g_spm_partition_db.partitions[partition_idx].
-                       stack[TFM_STACK_SIZE]);
+    return g_spm_partition_db.partitions[partition_idx].stack_size;
 }
 
 static uint32_t tfm_spm_partition_get_stack_limit_ext(uint32_t partition_idx)
 {
-    return (uint32_t)&g_spm_partition_db.partitions[partition_idx].stack;
+    return g_spm_partition_db.partitions[partition_idx].stack_limit;
+}
+
+static uint32_t tfm_spm_partition_get_stack_base_ext(uint32_t partition_idx)
+{
+    return tfm_spm_partition_get_stack_limit_ext(partition_idx) + tfm_spm_partition_get_stack_size_ext(partition_idx);
 }
 
 static tfm_thrd_func_t
@@ -512,6 +518,12 @@ int32_t tfm_memory_check(void *buffer, size_t len, int32_t ns_caller)
     if (ns_caller) {
         base = (uintptr_t)NS_DATA_START;
         limit = (uintptr_t)(NS_DATA_START + NS_DATA_SIZE);
+        if (memory_check_range(buffer, len, base, limit) == IPC_SUCCESS) {
+            return IPC_SUCCESS;
+        }
+
+        base = (uintptr_t)NS_CODE_START;
+        limit = (uintptr_t)(NS_CODE_START + NS_CODE_SIZE);
         if (memory_check_range(buffer, len, base, limit) == IPC_SUCCESS) {
             return IPC_SUCCESS;
         }

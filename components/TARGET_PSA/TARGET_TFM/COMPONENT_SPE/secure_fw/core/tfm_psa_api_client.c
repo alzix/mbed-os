@@ -48,7 +48,8 @@ int32_t tfm_core_ns_ipc_request(void *fn, int32_t arg1, int32_t arg2,
                                 int32_t arg3, int32_t arg4)
 {
     int32_t args[4] = {arg1, arg2, arg3, arg4};
-    struct tfm_sfn_req_s desc, *desc_ptr = &desc;
+    volatile struct tfm_sfn_req_s desc;
+    struct tfm_sfn_req_s *desc_ptr = &desc;
     int32_t res;
 
     desc.sfn = fn;
