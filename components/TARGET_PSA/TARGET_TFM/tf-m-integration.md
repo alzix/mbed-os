@@ -62,11 +62,7 @@ The target should be represented in a following way in `target.json` (`MUSCA_A1`
         "device_has_add": ["INTERRUPTIN", "LPTICKER", "SERIAL", "SLEEP", "USTICKER"],
         "macros": [
             "MBED_TZ_DEFAULT_ACCESS=1",
-            "__STARTUP_CLEAR_BSS",
             "MBED_FAULT_HANDLER_DISABLED",
-            "CMSIS_NVIC_VIRTUAL",
-            "LPTICKER_DELAY_TICKS=1",
-            "MBED_MPU_CUSTOM",
             "TFM_PSA_API",
             "MBEDTLS_PSA_CRYPTO_C"
         ],
@@ -78,13 +74,10 @@ The target should be represented in a following way in `target.json` (`MUSCA_A1`
         "core": "Cortex-M33",
         "device_has_add": ["FLASH"],
         "macros": [
-            "__STARTUP_CLEAR_BSS_MULTIPLE",
-            "__STARTUP_COPY_MULTIPLE",
             "MBED_FAULT_HANDLER_DISABLED",
             "MBED_MPU_CUSTOM",
             "BYPASS_NVSTORE_CHECK",
             "TFM_LVL=1",
-            "DAUTH_CHIP_DEFAULT",
             "TFM_PSA_API",
             "MBEDTLS_PSA_CRYPTO_SPM",
             "MBEDTLS_PSA_CRYPTO_C",
@@ -96,6 +89,18 @@ The target should be represented in a following way in `target.json` (`MUSCA_A1`
         "extra_labels_add": ["MUSCA_A1_S", "PSA", "TFM"]
     },
 ```
+
+Example details:
+- Secure target:
+  - `"device_has_add": ["FLASH"]` and `"components_add": ["FLASHIAP"]` for enabling storage stack. Required by PSA Internal storage service.
+  - `"extra_labels_add": ["PSA", "TFM"]` are required to add PSA services and TF-M SPM implementation sources to a compilation
+  - all the macros from the example above are required
+  - must inherit from `SPE_Target`
+- Nonsecure target:
+  -  must inherit from `NSPE_Target`
+  - `"extra_labels_add": ["PSA", "TFM"]` are required to add PSA services and TF-M SPM implementation sources to a compilation
+  - all the macros from the example above are required
+  -  `post_binary_hook` is used to combine secure and non-secure images
 
 ### HAL
 For porting Mbed-OS & TF-M both Mbed-OS and TF-M HAL layers should be created.
