@@ -181,13 +181,6 @@ static void psa_mac_operation(void)
     psa_get(PSA_MAC, &msg);
     switch (msg.type) {
         case PSA_IPC_CONNECT: {
-            psa_mac_operation_t *psa_operation = mbedtls_calloc(1, sizeof(psa_mac_operation_t));
-            if (psa_operation == NULL) {
-                status = PSA_CONNECTION_REFUSED;
-                break;
-            }
-
-            psa_set_rhandle(msg.handle, psa_operation);
             break;
         }
 
@@ -198,6 +191,16 @@ static void psa_mac_operation(void)
             if (msg.in_size[0] != sizeof(psa_crypto_ipc_t)) {
                 status = PSA_ERROR_COMMUNICATION_FAILURE;
                 break;
+            }
+
+            if (!msg.rhandle) {
+                psa_mac_operation_t *psa_operation = mbedtls_calloc(1, sizeof(psa_mac_operation_t));
+                if (psa_operation == NULL) {
+                    status = PSA_ERROR_INSUFFICIENT_MEMORY;
+                    break;
+                }
+                psa_set_rhandle(msg.handle, psa_operation);
+                msg.rhandle = psa_operation;
             }
 
             bytes_read = psa_read(msg.handle, 0, &psa_crypto, msg.in_size[0]);
@@ -336,13 +339,6 @@ static void psa_hash_operation(void)
     psa_get(PSA_HASH, &msg);
     switch (msg.type) {
         case PSA_IPC_CONNECT: {
-            psa_hash_operation_t *psa_operation = mbedtls_calloc(1, sizeof(psa_hash_operation_t));
-            if (psa_operation == NULL) {
-                status = PSA_CONNECTION_REFUSED;
-                break;
-            }
-
-            psa_set_rhandle(msg.handle, psa_operation);
             break;
         }
 
@@ -353,6 +349,16 @@ static void psa_hash_operation(void)
             if (msg.in_size[0] != sizeof(psa_crypto_ipc_t)) {
                 status = PSA_ERROR_COMMUNICATION_FAILURE;
                 break;
+            }
+
+            if (!msg.rhandle) {
+                psa_hash_operation_t *psa_operation = mbedtls_calloc(1, sizeof(psa_hash_operation_t));
+                if (psa_operation == NULL) {
+                    status = PSA_ERROR_INSUFFICIENT_MEMORY;
+                    break;
+                }
+                psa_set_rhandle(msg.handle, psa_operation);
+                msg.rhandle = psa_operation;
             }
 
             bytes_read = psa_read(msg.handle, 0, &psa_crypto, msg.in_size[0]);
@@ -814,14 +820,6 @@ static void psa_symmetric_operation(void)
     psa_get(PSA_SYMMETRIC, &msg);
     switch (msg.type) {
         case PSA_IPC_CONNECT: {
-            psa_cipher_operation_t *psa_operation =
-                mbedtls_calloc(1, sizeof(psa_cipher_operation_t));
-            if (psa_operation == NULL) {
-                status = PSA_CONNECTION_REFUSED;
-                break;
-            }
-
-            psa_set_rhandle(msg.handle, psa_operation);
             break;
         }
 
@@ -832,6 +830,16 @@ static void psa_symmetric_operation(void)
             if (msg.in_size[0] != sizeof(psa_crypto_ipc_t)) {
                 status = PSA_ERROR_COMMUNICATION_FAILURE;
                 break;
+            }
+
+            if (!msg.rhandle) {
+                psa_cipher_operation_t *psa_operation = mbedtls_calloc(1, sizeof(psa_cipher_operation_t));
+                if (psa_operation == NULL) {
+                    status = PSA_ERROR_INSUFFICIENT_MEMORY;
+                    break;
+                }
+                psa_set_rhandle(msg.handle, psa_operation);
+                msg.rhandle = psa_operation;
             }
 
             bytes_read = psa_read(msg.handle, 0, &psa_crypto_ipc,
@@ -1328,14 +1336,6 @@ void psa_crypto_generator_operations(void)
 
     switch (msg.type) {
         case PSA_IPC_CONNECT: {
-            psa_crypto_generator_t *psa_operation =
-                mbedtls_calloc(1, sizeof(psa_crypto_generator_t));
-            if (psa_operation == NULL) {
-                status = PSA_ERROR_INSUFFICIENT_MEMORY;
-                break;
-            }
-
-            psa_set_rhandle(msg.handle, psa_operation);
             break;
         }
 
@@ -1345,6 +1345,16 @@ void psa_crypto_generator_operations(void)
             if (msg.in_size[0] != sizeof(psa_crypto_derivation_ipc_t)) {
                 status = PSA_ERROR_COMMUNICATION_FAILURE;
                 break;
+            }
+
+            if (!msg.rhandle) {
+                psa_crypto_generator_t *psa_operation = mbedtls_calloc(1, sizeof(psa_crypto_generator_t));
+                if (psa_operation == NULL) {
+                    status = PSA_ERROR_INSUFFICIENT_MEMORY;
+                    break;
+                }
+                psa_set_rhandle(msg.handle, psa_operation);
+                msg.rhandle = psa_operation;
             }
 
             bytes_read = psa_read(msg.handle, 0, &psa_crypto_ipc,
