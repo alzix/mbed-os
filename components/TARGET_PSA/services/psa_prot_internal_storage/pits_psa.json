@@ -4,7 +4,7 @@
     "priority": "NORMAL",
     "id": "0x0000000A",
     "entry_point": "its_entry",
-    "stack_size": "0x400",
+    "stack_size": "0x800",
     "heap_size": "0x400",
     "services": [{
         "name": "PSA_ITS_GET",
