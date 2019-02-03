@@ -16,7 +16,7 @@ void mbed_val_test_init(uint32_t test_num, char8_t *desc, uint32_t test_bitfield
     mbed_val_print(PRINT_ALWAYS, "\nTEST: %d | DESCRIPTION: ", test_num);
     mbed_val_print(PRINT_ALWAYS, desc, 0);
 
-    GREENTEA_SETUP(100, "default_auto");
+    //GREENTEA_SETUP(100, "default_auto");
     mbed_val_set_status(RESULT_START(VAL_STATUS_SUCCESS));
     return;
 }

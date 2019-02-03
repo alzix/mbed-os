@@ -19,6 +19,8 @@
 #define _VAL_CLIENT_H_
 
 #include "val.h"
+#include "psa/client.h"
+#include "crypto_values.h"
 
 #define INVALID_SID                     0x0000FA20
 
