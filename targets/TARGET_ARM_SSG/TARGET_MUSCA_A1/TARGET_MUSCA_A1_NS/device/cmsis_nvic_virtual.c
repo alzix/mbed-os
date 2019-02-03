@@ -17,9 +17,9 @@
  */
 
 #include "cmsis_nvic_virtual.h"
-#include "tfm_platform_veneers.h"
+#include "psa/lifecycle.h"
 
 void NVIC_SystemReset(void)
 {
-    tfm_platform_veneer_system_reset();
+    psa_system_reset();
 }
