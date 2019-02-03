@@ -59,6 +59,12 @@ static psa_status_t lifecycle_change_request(psa_msg_t *msg)
 
 }
 
+static psa_status_t system_reset_request(psa_msg_t *msg)
+{
+    (void)msg;
+    psa_system_reset_impl();
+}
+
 static void message_handler(psa_msg_t *msg, SignalHandler handler)
 {
     psa_status_t status = PSA_SUCCESS;
@@ -97,6 +103,10 @@ void platform_partition_entry(void *ptr)
         if ((signals & PSA_PLATFORM_LC_SET_MSK) != 0) {
             psa_get(PSA_PLATFORM_LC_SET_MSK, &msg);
             message_handler(&msg, lifecycle_change_request);
+        }
+        if ((signals & PSA_PLATFORM_SYSTEM_RESET_MSK) != 0) {
+            psa_get(PSA_PLATFORM_SYSTEM_RESET_MSK, &msg);
+            message_handler(&msg, system_reset_request);
         }
     }
 }
