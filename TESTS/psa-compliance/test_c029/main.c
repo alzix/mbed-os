@@ -5,6 +5,6 @@ extern const psa_api_t psa_api;
 
 int main(void)
 {
-    test_entry_c001(&val_api, &psa_api);
+    test_entry_c029(&val_api, &psa_api);
     return 0;
 }
