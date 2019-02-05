@@ -15,6 +15,7 @@
  * limitations under the License.
 **/
 
+#define ITS_TEST
 #include "val_interfaces.h"
 #include "val_target.h"
 #include "test_s001.h"
