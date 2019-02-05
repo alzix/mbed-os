@@ -3,7 +3,7 @@
     "config": {
         "handle_pool_size": {
             "help": "maximum number of handles that can be opened at the same time",
-            "macro_name": "TFM_SERVICE_HANLDE_MAX_NUM",
+            "macro_name": "TFM_CONN_HANDLE_MAX_NUM",
             "value": 10
         },
         "rot_pool_size": {

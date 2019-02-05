@@ -20,6 +20,10 @@ struct tfm_msg_body_t {
     psa_msg_t msg;                  /* PSA message body                 */
     psa_invec invec[PSA_MAX_IOVEC]; /* Put in/out vectors in msg body   */
     psa_outvec outvec[PSA_MAX_IOVEC];
+    psa_outvec *caller_outvec;      /*
+                                     * Save caller outvec pointer for
+                                     * write length update
+                                     */
     struct tfm_msg_body_t *next;    /* List operators                   */
 };
 

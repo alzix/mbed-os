@@ -19,6 +19,8 @@
 #include "tfm_message_queue.h"
 #include "tfm_spm.h"
 #include "secure_utilities.h"
+#include "tfm_api.h"
+#include "tfm_secure_api.h"
 
 #define PSA_TIMEOUT_MASK        PSA_BLOCK
 
@@ -91,13 +93,13 @@ psa_handle_t tfm_svcall_psa_connect(uint32_t *args, int32_t ns_caller)
 
     /* No input or output needed for connect message */
     msg = tfm_spm_create_msg(service, PSA_NULL_HANDLE, PSA_IPC_CONNECT,
-                             ns_caller, NULL, 0, NULL, 0);
+                             ns_caller, NULL, 0, NULL, 0, NULL);
     if (!msg) {
         return PSA_NULL_HANDLE;
     }
 
     /*
-     * Send message and wake up the SP who is wating on message queue,
+     * Send message and wake up the SP who is waiting on message queue,
      * and scheduler triggered
      */
     tfm_spm_send_event(service, msg);
@@ -135,12 +137,19 @@ psa_status_t tfm_svcall_psa_call(uint32_t *args, int32_t ns_caller)
          * FixMe: From non-secure caller, vec and len are composed into a new
          * struct parameter. Need to extract them.
          */
-        TFM_ASSERT(args[1] != 0);
-        TFM_ASSERT(args[2] != 0);
+        if (tfm_memory_check((void *)args[1], sizeof(uint32_t),
+            ns_caller) != IPC_SUCCESS) {
+            tfm_panic();
+        }
+        if (tfm_memory_check((void *)args[2], sizeof(uint32_t),
+            ns_caller) != IPC_SUCCESS) {
+            tfm_panic();
+        }
+
         inptr = (psa_invec *)((psa_invec *)args[1])->base;
         in_num = ((psa_invec *)args[1])->len;
-        outptr = ((psa_outvec *)args[2])->base;
-        out_num = ((psa_outvec *)args[2])->len;
+        outptr = (psa_outvec *)((psa_invec *)args[2])->base;
+        out_num = ((psa_invec *)args[2])->len;
     }
 
     /* It is a fatal error if in_len + out_len > PSA_MAX_IOVEC. */
@@ -194,14 +203,14 @@ psa_status_t tfm_svcall_psa_call(uint32_t *args, int32_t ns_caller)
      * Service or incorrectly formatted.
      */
     msg = tfm_spm_create_msg(service, handle, PSA_IPC_CALL, ns_caller, invecs,
-                             in_num, outvecs, out_num);
+                             in_num, outvecs, out_num, outptr);
     if (!msg) {
         /* FixMe: Need to implement one mechanism to resolve this failure. */
         tfm_panic();
     }
 
     /*
-     * Send message and wake up the SP who is wating on message queue,
+     * Send message and wake up the SP who is waiting on message queue,
      * and scheduler triggered
      */
     if (tfm_spm_send_event(service, msg) != IPC_SUCCESS) {
@@ -236,20 +245,20 @@ void tfm_svcall_psa_close(uint32_t *args, int32_t ns_caller)
 
     /* No input or output needed for close message */
     msg = tfm_spm_create_msg(service, handle, PSA_IPC_DISCONNECT, ns_caller,
-                             NULL, 0, NULL, 0);
+                             NULL, 0, NULL, 0, NULL);
     if (!msg) {
         /* FixMe: Need to implement one mechanism to resolve this failure. */
         return;
     }
 
     /*
-     * Send message and wake up the SP who is wating on message queue,
+     * Send message and wake up the SP who is waiting on message queue,
      * and scheduler triggered
      */
     tfm_spm_send_event(service, msg);
 
     /* Service handle is not used anymore */
-    tfm_spm_free_service_handle(service, handle);
+    tfm_spm_free_conn_handle(service, handle);
 }
 
 /*********************** SVC handler for PSA Service APIs ********************/
@@ -268,7 +277,7 @@ static psa_signal_t tfm_svcall_psa_wait(uint32_t *args)
 {
     psa_signal_t signal_mask;
     uint32_t timeout;
-    struct tfm_spm_partition_t *partition = NULL;
+    struct tfm_spm_ipc_partition_t *partition = NULL;
 
     TFM_ASSERT(args != NULL);
     signal_mask = (psa_signal_t)args[0];
@@ -293,8 +302,10 @@ static psa_signal_t tfm_svcall_psa_wait(uint32_t *args)
     partition->signal_mask = signal_mask;
 
     /*
-     * Return value of blocked caller is set by psa_reply(). Just return ZERO
-     * here in blocked case.
+     * tfm_event_wait() blocks the caller thread if no signals are available.
+     * In this case, the return value of this function is temporary set into
+     * runtime context. After new signal(s) are available, the return value
+     * is updated with the available signal(s) and blocked thread gets to run.
      */
     if ((timeout == PSA_BLOCK) && ((partition->signals & signal_mask) == 0)) {
             tfm_event_wait(&partition->signal_event);
@@ -326,7 +337,7 @@ static psa_status_t tfm_svcall_psa_get(uint32_t *args)
     psa_msg_t *msg = NULL;
     struct tfm_spm_service_t *service = NULL;
     struct tfm_msg_body_t *tmp_msg = NULL;
-    struct tfm_spm_partition_t *partition = NULL;
+    struct tfm_spm_ipc_partition_t *partition = NULL;
 
     TFM_ASSERT(args != NULL);
     signal = (psa_signal_t)args[0];
@@ -495,6 +506,7 @@ static size_t tfm_svcall_psa_read(uint32_t *args)
      * It is a fatal error if the memory reference for buffer is invalid or
      * not writable
      */
+    /* FixMe: write permission check to be added */
     if (tfm_memory_check(buffer, num_bytes, false) != IPC_SUCCESS) {
         tfm_panic();
     }
@@ -650,17 +662,29 @@ static void tfm_svcall_psa_write(uint32_t *args)
         tfm_panic();
     }
 
-    tfm_memcpy(msg->outvec[outvec_idx].base, buffer, num_bytes);
+    tfm_memcpy(msg->outvec[outvec_idx].base + msg->outvec[outvec_idx].len,
+               buffer, num_bytes);
 
-    /*
-     * The total number of bytes written to a single parameter must be reported
-     * to the client by updating the len member of the psa_outvec structure for
-     * the parameter before returning from psa_call().
-     */
-    msg->outvec[outvec_idx].base += num_bytes;
+    /* Update the write number */
     msg->outvec[outvec_idx].len += num_bytes;
 }
 
+static void update_caller_outvec_len(struct tfm_msg_body_t *msg)
+{
+    int32_t i = 0;
+
+    /*
+     * FixeMe: abstract these part into dedicated functions to avoid
+     * accessing thread context in psa layer
+     */
+    TFM_ASSERT(msg->ack_mtx.owner->status == THRD_STAT_BLOCK);
+
+    while (msg->msg.out_size[i] != 0) {
+        TFM_ASSERT(msg->caller_outvec[i].base == msg->outvec[i].base);
+        msg->caller_outvec[i].len = msg->outvec[i].len;
+        i++;
+    }
+}
 /**
  * \brief SVC handler for \ref psa_reply.
  *
@@ -715,7 +739,7 @@ static void tfm_svcall_psa_reply(uint32_t *args)
          * input status.
          */
         if (status == PSA_SUCCESS) {
-            connect_handle = tfm_spm_create_service_handle(service);
+            connect_handle = tfm_spm_create_conn_handle(service);
             if (connect_handle == PSA_NULL_HANDLE) {
                 tfm_panic();
             }
@@ -744,6 +768,13 @@ static void tfm_svcall_psa_reply(uint32_t *args)
         } else {
             tfm_panic();
         }
+
+        /*
+         * The total number of bytes written to a single parameter must be
+         * reported to the client by updating the len member of the psa_outvec
+         * structure for the parameter before returning from psa_call().
+         */
+        update_caller_outvec_len(msg);
         break;
     case PSA_IPC_DISCONNECT:
         /*
@@ -758,10 +789,7 @@ static void tfm_svcall_psa_reply(uint32_t *args)
     /* Save return value for blocked threads */
     tfm_event_owner_retval(&msg->ack_mtx, ret);
 
-    /*
-     * Set mutex to wake waiting thread up (It MAY be RUNNING instead of
-     * BLOCK!!)
-     */
+    /* Wake waiting thread up */
     tfm_event_signal(&msg->ack_mtx);
 
     /* Message should not be unsed anymore */
@@ -780,7 +808,7 @@ static void tfm_svcall_psa_reply(uint32_t *args)
 static void tfm_svcall_psa_notify(uint32_t *args)
 {
     int32_t partition_id;
-    struct tfm_spm_partition_t *partition = NULL;
+    struct tfm_spm_ipc_partition_t *partition = NULL;
 
     TFM_ASSERT(args != NULL);
     partition_id = (int32_t)args[0];
@@ -790,7 +818,7 @@ static void tfm_svcall_psa_notify(uint32_t *args)
      * notification must be a Secure Partition, providing a Non-secure
      * Partition ID is a fatal error.
      */
-    if (partition_id <= 0) {
+    if (!TFM_CLIENT_ID_IS_S(partition_id)) {
         tfm_panic();
     }
 
@@ -805,14 +833,15 @@ static void tfm_svcall_psa_notify(uint32_t *args)
 
     partition->signals |= PSA_DOORBELL;
 
-    /* Save return value for blocked threads */
+    /*
+     * The target partition may be blocked with waiting for signals after
+     * called psa_wait(). Set the return value with the available signals
+     * before wake it up with tfm_event_signal().
+     */
     tfm_event_owner_retval(&partition->signal_event,
                            partition->signals & partition->signal_mask);
 
-    /*
-     * Set mutex to wake waiting thread up
-     * (It MAY be RUNNING instead of BLOCK!!)
-     */
+    /* Wake waiting thread up */
     tfm_event_signal(&partition->signal_event);
 }
 
@@ -825,7 +854,7 @@ static void tfm_svcall_psa_notify(uint32_t *args)
  */
 static void tfm_svcall_psa_clear(uint32_t *args)
 {
-    struct tfm_spm_partition_t *partition = NULL;
+    struct tfm_spm_ipc_partition_t *partition = NULL;
 
     partition = tfm_spm_get_running_partition();
     if (!partition) {
@@ -857,7 +886,7 @@ static void tfm_svcall_psa_clear(uint32_t *args)
 static void tfm_svcall_psa_eoi(uint32_t *args)
 {
     psa_signal_t irq_signal;
-    struct tfm_spm_partition_t *partition = NULL;
+    struct tfm_spm_ipc_partition_t *partition = NULL;
 
     TFM_ASSERT(args != NULL);
     irq_signal = (psa_signal_t)args[0];

@@ -68,7 +68,7 @@ void *tfm_pool_alloc(struct tfm_pool_instance_t *pool)
     }
 
     node = tfm_list_first_node(&pool->chunks_list);
-    pchunk = TFM_TO_CONTAINER(node, struct tfm_pool_chunk_t, list);
+    pchunk = TFM_GET_CONTAINER_PTR(node, struct tfm_pool_chunk_t, list);
 
     /* Remove node from list node, it will be added when pool free */
     tfm_list_del_node(node);
@@ -81,7 +81,7 @@ void tfm_pool_free(void *ptr)
     struct tfm_pool_chunk_t *pchunk;
     struct tfm_pool_instance_t *pool;
 
-    pchunk = TFM_TO_CONTAINER(ptr, struct tfm_pool_chunk_t, data);
+    pchunk = TFM_GET_CONTAINER_PTR(ptr, struct tfm_pool_chunk_t, data);
     pool = (struct tfm_pool_instance_t *)pchunk->pool;
     tfm_list_add_tail(&pool->chunks_list, &pchunk->list);
 }

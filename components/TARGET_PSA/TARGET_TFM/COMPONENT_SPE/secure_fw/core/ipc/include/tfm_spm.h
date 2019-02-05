@@ -16,12 +16,12 @@
 #define TFM_VERSION_POLICY_RELAXED      0
 #define TFM_VERSION_POLICY_STRICT       1
 
-#ifndef TFM_SERVICE_HANLDE_MAX_NUM
-#define TFM_SERVICE_HANLDE_MAX_NUM      32
+#ifndef TFM_CONN_HANDLE_MAX_NUM
+#define TFM_CONN_HANDLE_MAX_NUM         32
 #endif
 
-/* RoT service handle list */
-struct tfm_service_handle_t {
+/* RoT connection handle list */
+struct tfm_conn_handle_t {
     psa_handle_t handle;            /* Handle value                         */
     void *rhandle;                  /* Reverse handle value                 */
     struct tfm_list_node_t list;    /* list node                            */
@@ -41,14 +41,22 @@ struct tfm_spm_service_db_t {
 /* RoT Service data */
 struct tfm_spm_service_t {
     struct tfm_spm_service_db_t *service_db; /* Service database pointer     */
-    struct tfm_spm_partition_t *partition; /* Point to secure partition data */
+    struct tfm_spm_ipc_partition_t *partition; /*
+                                                * Point to secure partition
+                                                * data
+                                                */
     struct tfm_list_node_t handle_list;    /* Service handle list            */
     struct tfm_msg_queue_t msg_queue;      /* Message queue                  */
     struct tfm_list_node_t list;           /* For list operation             */
 };
 
+/*
+ * FixMe: This structure is for IPC partition which is different with library
+ * mode partition. There needs to be an alignment for IPC partition database
+ * and library mode database.
+ */
 /* Secure Partition data */
-struct tfm_spm_partition_t {
+struct tfm_spm_ipc_partition_t {
     int32_t index;                      /* Partition index                   */
     int32_t id;                         /* Secure partition ID               */
     struct tfm_event_ctx signal_event;  /* Event signal                      */
@@ -57,7 +65,7 @@ struct tfm_spm_partition_t {
     struct tfm_list_node_t service_list;/* Service list                      */
 };
 
-/********************** Legency SPM CORE function extend *********************/
+/*************************** Extended SPM functions **************************/
 
 /**
  * \brief   Get the running partition ID.
@@ -69,35 +77,35 @@ uint32_t tfm_spm_partition_get_running_partition_id_ext(void);
 /******************** Service handle management functions ********************/
 
 /**
- * \brief                   Create service handle for client connect
+ * \brief                   Create connection handle for client connect
  *
  * \param[in] service       Target service context pointer
  *
  * \retval PSA_NULL_HANDLE  Create failed \ref PSA_NULL_HANDLE
  * \retval >0               Service handle created, \ref psa_handle_t
  */
-psa_handle_t tfm_spm_create_service_handle(struct tfm_spm_service_t *service);
+psa_handle_t tfm_spm_create_conn_handle(struct tfm_spm_service_t *service);
 
 /**
- * \brief                   Free service handle which not used anymore.
+ * \brief                   Free connection handle which not used anymore.
  *
  * \param[in] service       Target service context pointer
- * \param[in] service_handle  Service handle created by
- *                          spm_create_service_handle(), \ref psa_handle_t
+ * \param[in] conn_handle   Connection handle created by
+ *                          tfm_spm_create_conn_handle(), \ref psa_handle_t
  *
  * \retval IPC_SUCCESS      Success
  * \retval IPC_ERROR_BAD_PARAMETERS  Bad parameters input
  * \retval "Does not return"  Panic for not find service by handle
  */
-int32_t tfm_spm_free_service_handle(struct tfm_spm_service_t *service,
-                                    psa_handle_t service_handle);
+int32_t tfm_spm_free_conn_handle(struct tfm_spm_service_t *service,
+                                 psa_handle_t conn_handle);
 
 /**
  * \brief                   Set reverse handle value for connection.
  *
  * \param[in] service       Target service context pointer
- * \param[in] service_handle  Service handle created by
- *                          spm_create_service_handle(), \ref psa_handle_t
+ * \param[in] conn_handle   Connection handle created by
+ *                          tfm_spm_create_conn_handle(), \ref psa_handle_t
  * \param[in] rhandle       rhandle need to save
  *
  * \retval IPC_SUCCESS      Success
@@ -105,15 +113,15 @@ int32_t tfm_spm_free_service_handle(struct tfm_spm_service_t *service,
  * \retval "Does not return"  Panic for not find handle node
  */
 int32_t tfm_spm_set_rhandle(struct tfm_spm_service_t *service,
-                            psa_handle_t service_handle,
+                            psa_handle_t conn_handle,
                             void *rhandle);
 
 /**
  * \brief                   Get reverse handle value from connection hanlde.
  *
  * \param[in] service       Target service context pointer
- * \param[in] service_handle  Service handle created by
- *                          spm_create_service_handle(), \ref psa_handle_t
+ * \param[in] conn_handle   Connection handle created by
+ *                          tfm_spm_create_conn_handle(), \ref psa_handle_t
  *
  * \retval void *           Success
  * \retval "Does not return"  Panic for those:
@@ -122,7 +130,7 @@ int32_t tfm_spm_set_rhandle(struct tfm_spm_service_t *service,
  *                              handle node does not be found
  */
 void *tfm_spm_get_rhandle(struct tfm_spm_service_t *service,
-                          psa_handle_t service_handle);
+                          psa_handle_t conn_handle);
 
 /******************** Partition management functions *************************/
 
@@ -133,7 +141,7 @@ void *tfm_spm_get_rhandle(struct tfm_spm_service_t *service,
  * \retval "Not NULL"       Return the parttion context pointer
  *                          \ref spm_partition_t structures
  */
-struct tfm_spm_partition_t *tfm_spm_get_running_partition(void);
+struct tfm_spm_ipc_partition_t *tfm_spm_get_running_partition(void);
 
 /**
  * \brief                   Get the service context by signal.
@@ -148,7 +156,7 @@ struct tfm_spm_partition_t *tfm_spm_get_running_partition(void);
  *                          \ref spm_service_t structures
  */
 struct tfm_spm_service_t *
-tfm_spm_get_service_by_signal(struct tfm_spm_partition_t *partition,
+tfm_spm_get_service_by_signal(struct tfm_spm_ipc_partition_t *partition,
                               psa_signal_t signal);
 
 /**
@@ -163,17 +171,17 @@ tfm_spm_get_service_by_signal(struct tfm_spm_partition_t *partition,
 struct tfm_spm_service_t *tfm_spm_get_service_by_sid(uint32_t sid);
 
 /**
- * \brief                   Get the service context by service handle.
+ * \brief                   Get the service context by connection handle.
  *
- * \param[in] service_handle Service handle created by
- *                          spm_create_service_handle()
+ * \param[in] conn_handle   Connection handle created by
+ *                          tfm_spm_create_conn_handle()
  *
  * \retval NULL             Failed
  * \retval "Not NULL"       Target service context pointer,
  *                          \ref spm_service_t structures
  */
 struct tfm_spm_service_t *
-        tfm_spm_get_service_by_handle(psa_handle_t service_handle);
+        tfm_spm_get_service_by_handle(psa_handle_t conn_handle);
 
 /**
  * \brief                   Get the partition context by partition ID.
@@ -184,7 +192,8 @@ struct tfm_spm_service_t *
  * \retval "Not NULL"       Target partition context pointer,
  *                          \ref spm_partition_t structures
  */
-struct tfm_spm_partition_t *tfm_spm_get_partition_by_id(int32_t partition_id);
+struct tfm_spm_ipc_partition_t *
+    tfm_spm_get_partition_by_id(int32_t partition_id);
 
 /************************ Message functions **********************************/
 
@@ -208,20 +217,22 @@ struct tfm_msg_body_t *tfm_spm_get_msg_from_handle(psa_handle_t msg_handle);
  *                          be \ref PSA_NULL_HANDLE in psa_connect().
  * \param[in] type          Message type, PSA_IPC_CONNECT, PSA_IPC_CALL or
  *                          PSA_IPC_DISCONNECT
- * \param[in] ns_caller     Whether from NS
- * \param[in] in_vec        Array of input \ref psa_invec structures
+ * \param[in] ns_caller     Whether from NS caller
+ * \param[in] invec         Array of input \ref psa_invec structures
  * \param[in] in_len        Number of input \ref psa_invec structures
- * \param[in] out_vec       Array of output \ref psa_outvec structures
+ * \param[in] outvec        Array of output \ref psa_outvec structures
  * \param[in] out_len       Number of output \ref psa_outvec structures
+ * \param[in] caller_outvec Array of caller output \ref psa_outvec structures
  *
  * \retval NULL             Failed
  * \retval "Not NULL"       New message body pointer \ref msg_body_t structures
  */
 struct tfm_msg_body_t *tfm_spm_create_msg(struct tfm_spm_service_t *service,
                                           psa_handle_t handle,
-                                          uint32_t type, bool ns_caller,
+                                          uint32_t type, int32_t ns_caller,
                                           psa_invec *invec, size_t in_len,
-                                          psa_outvec *outvec, size_t out_len);
+                                          psa_outvec *outvec, size_t out_len,
+                                          psa_outvec *caller_outvec);
 
 /**
  * \brief                   Free message which unused anymore
@@ -270,7 +281,7 @@ int32_t tfm_spm_check_client_version(struct tfm_spm_service_t *service,
  * \brief                   Check the memory reference is valid.
  *
  * \param[in] buffer        Pointer of memory reference
- * \param[in] len           Length of memory reference
+ * \param[in] len           Length of memory reference in bytes
  * \param[in] ns_caller     From non-secure caller
  *
  * \retval IPC_SUCCESS      Success

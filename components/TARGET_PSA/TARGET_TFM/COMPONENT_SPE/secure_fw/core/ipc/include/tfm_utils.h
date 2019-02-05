@@ -20,9 +20,9 @@ void tfm_panic(void);
                 }                                                   \
             } while (0)
 
-/* Get the container function address from a member */
-#define TFM_TO_CONTAINER(ptr, type, member) \
-    (type *)((unsigned long)(ptr) - (unsigned long)&((type *)0)->member)
+/* Get container structure start address from member */
+#define TFM_GET_CONTAINER_PTR(ptr, type, member) \
+    (type *)((unsigned long)(ptr) - offsetof(type, member))
 
 int32_t tfm_bitcount(uint32_t n);
 
