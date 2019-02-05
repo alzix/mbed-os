@@ -304,4 +304,20 @@ void mbed_val_ipc_close(psa_handle_t handle)
     pal_ipc_close(handle);
 }
 
+
+/**
+ * @brief reprogram the watchdog timer
+ * always succeeds on mbed-greentead testing.
+ *
+ * @param timeout_type type of timeout.
+ * @return val_status_t
+ */
+val_status_t mbed_val_wd_reprogram_timer(wd_timeout_type_t timeout_type)
+{
+    return VAL_STATUS_SUCCESS;
 }
+
+
+}
+
+
