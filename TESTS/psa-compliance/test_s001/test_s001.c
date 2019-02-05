@@ -20,6 +20,7 @@
 #include "val_target.h"
 #include "test_s001.h"
 #ifdef ITS_TEST
+#include "psa/internal_trusted_storage.h"
 #include "test_its_data.h"
 #elif PS_TEST
 #include "test_ps_data.h"
