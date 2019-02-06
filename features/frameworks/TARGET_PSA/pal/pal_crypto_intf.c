@@ -324,8 +324,6 @@ int32_t pal_crypto_function(int type, va_list valist)
             alg = va_arg(valist, psa_algorithm_t);
             return psa_key_agreement(generator, handle, buffer, size, alg);
         case PAL_CRYPTO_ALLOCATE_KEY:
-            key_type = va_arg(valist, psa_key_type_t);
-            size = va_arg(valist, size_t);
             key_handle = (psa_key_handle_t *)va_arg(valist, int*);
             return psa_allocate_key(key_handle);
         case PAL_CRYPTO_FREE:
