@@ -117,7 +117,7 @@ int32_t psa_cipher_update_test(security_t caller)
         status = val->crypto_function(VAL_CRYPTO_CIPHER_UPDATE, &invalid_operation,
                     check1[i].input, check1[i].input_length, output, check1[i].output_size,
                     &length);
-        TEST_ASSERT_EQUAL(status, PSA_ERROR_BAD_STATE, TEST_CHECKPOINT_NUM(13));
+        TEST_ASSERT_EQUAL(status, PSA_ERROR_INVALID_ARGUMENT, TEST_CHECKPOINT_NUM(13));
 
         /* Abort a cipher operation */
         status = val->crypto_function(VAL_CRYPTO_CIPHER_ABORT, &operation);
