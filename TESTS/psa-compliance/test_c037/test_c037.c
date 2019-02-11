@@ -134,7 +134,7 @@ int32_t psa_cipher_finish_test(security_t caller)
 
         /* Abort a cipher operation */
         status = val->crypto_function(VAL_CRYPTO_CIPHER_ABORT, &invalid_operation);
-        TEST_ASSERT_EQUAL(status, PSA_SUCCESS, TEST_CHECKPOINT_NUM(16));
+        TEST_ASSERT_EQUAL(status, PSA_ERROR_BAD_STATE, TEST_CHECKPOINT_NUM(16));
     }
 
     return VAL_STATUS_SUCCESS;
