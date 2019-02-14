@@ -33,7 +33,7 @@ static uint8_t      data[BUFFER_SIZE];
 int32_t test_psa_export_public_key(security_t caller)
 {
     uint32_t         length, i;
-    uint8_t          *key_data;
+    const uint8_t    *key_data;
     psa_key_policy_t policy;
     psa_key_type_t   key_type;
     size_t           bits;
@@ -135,6 +135,7 @@ int32_t test_psa_export_public_key(security_t caller)
         {
             if (check1[i].key_type == PSA_KEY_TYPE_RSA_KEYPAIR)
                 key_data = expected_rsa_256_pubprv;
+
             else if (PSA_KEY_TYPE_IS_ECC_KEYPAIR(check1[i].key_type))
                 key_data = expected_ec_pubprv;
 
@@ -155,7 +156,7 @@ int32_t test_psa_export_public_key_handle(security_t caller)
     int              num_checks = sizeof(check2)/sizeof(check2[0]);
     uint32_t         i, length;
     int32_t          status;
-    uint8_t          *key_data;
+    const uint8_t    *key_data;
     psa_key_policy_t policy;
 
     /* Initialize the PSA crypto library*/
