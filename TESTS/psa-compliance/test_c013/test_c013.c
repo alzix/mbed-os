@@ -82,7 +82,7 @@ int32_t psa_hash_verify_test(security_t caller)
 int32_t psa_hash_verify_inactive_operation_handle(security_t caller)
 {
     psa_hash_operation_t    operation = {0};
-    psa_hash_operation_t    invalid_operation = {0xDEADEAD};
+    psa_hash_operation_t    invalid_operation = {0};
     char                    input = 0xbd;
     size_t                  input_length = 1;
     psa_algorithm_t         alg = PSA_ALG_SHA_256;
