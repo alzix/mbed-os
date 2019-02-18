@@ -109,7 +109,6 @@ static test_data check1[] = {
  AES_16B_KEY_SIZE, PSA_KEY_USAGE_SIGN, PSA_ALG_CBC_NO_PADDING,
  PSA_ERROR_INVALID_ARGUMENT
 },
-
 };
 
 static test_data check2[] = {

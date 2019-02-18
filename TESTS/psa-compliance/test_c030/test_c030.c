@@ -101,7 +101,7 @@ int32_t psa_mac_verify_finish_test(security_t caller)
          */
         status = val->crypto_function(VAL_CRYPTO_MAC_VERIFY_FINISH, &operation,
                     check1[i].expected_mac, check1[i].mac_size);
-        TEST_ASSERT_EQUAL(status, PSA_ERROR_INVALID_SIGNATURE , TEST_CHECKPOINT_NUM(10));
+        TEST_ASSERT_EQUAL(status, PSA_ERROR_BAD_STATE, TEST_CHECKPOINT_NUM(10));
 
         /* Abort a MAC operation */
         status = val->crypto_function(VAL_CRYPTO_MAC_ABORT, &operation);

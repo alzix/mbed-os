@@ -59,10 +59,12 @@ static test_data check1[] = {
 },
 
 {"Test psa_allocate_key with EC Public key\n", 9,
+ PSA_KEY_TYPE_ECC_PUBLIC_KEY_BASE | PSA_ECC_CURVE_SECP192R1,
  75, PSA_SUCCESS
 },
 
 {"Test psa_allocate_key with EC keypair\n", 10,
+ PSA_KEY_TYPE_ECC_KEYPAIR_BASE | PSA_ECC_CURVE_SECP192R1,
  97, PSA_SUCCESS
 },
 };

@@ -95,7 +95,7 @@ int32_t psa_generator_abort_test(security_t caller)
 
         /* Generate random bytes */
         status = val->crypto_function(VAL_CRYPTO_GENERATOR_READ, &generator, data, check1[i].size);
-        TEST_ASSERT_EQUAL(status, PSA_ERROR_INSUFFICIENT_CAPACITY, TEST_CHECKPOINT_NUM(8));
+        TEST_ASSERT_EQUAL(status, PSA_ERROR_BAD_STATE, TEST_CHECKPOINT_NUM(8));
 
         val->print(PRINT_TEST, "[Check %d] Multiple psa_generator_abort test\n", g_test_count++);
         /* Abort the generator */
